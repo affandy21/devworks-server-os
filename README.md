@@ -34,7 +34,6 @@ Manual lengkap tersedia di:
 ```
 
 Dokumen pendukung:
-```text
 - [Specification](docs/SPEC.md)
 - [ISO Build Guide](docs/ISO.md)
 - [VirtualBox Setup](docs/VIRTUALBOX_SETUP.md)
@@ -42,7 +41,6 @@ Dokumen pendukung:
 - [ISO Build Status](docs/ISO_BUILD_STATUS.md)
 - [Release Notes](docs/RELEASE_NOTES.md)
 - [Roadmap](docs/ROADMAP.md)
-```
   
 ## Status Singkat
 
