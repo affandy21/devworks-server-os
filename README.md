@@ -6,17 +6,13 @@
 [![License](https://img.shields.io/badge/license-proprietary-red)](LICENSE)
 
 
-Devworks Server OS adalah distribusi Linux kustom berbasis Debian Stable yang dirancang sebagai lingkungan pembelajaran dan pengembangan untuk deployment server web, runtime AI lokal, serta monitoring sistem.
+Devworks Server OS adalah distribusi Linux kustom berbasis Debian Stable yang dirancang sebagai lingkungan pembelajaran dan pengembangan untuk penerapan server web, runtime AI lokal, serta monitoring sistem.
 
-Build saat ini telah mencakup ISO bootable, desktop GUI ringan, Devworks Control Center berbasis aplikasi native, serta installer permanen ke disk. Sistem ini cocok digunakan untuk pembelajaran server secara langsung, eksperimen lokal, dan pengembangan di lingkungan yang aman dan terkontrol.
+Build saat ini telah mencakup ISO bootable, desktop GUI ringan, Devworks Control Center berbasis aplikasi native, serta installer permanen ke disk. Sistem ini cocok digunakan untuk pembelajaran server secara langsung, eksperimen lokal, dan pengembangan dalam lingkungan yang aman dan terkontrol.
 
 ## Download
 
-Release terbaru tersedia di:
-
-```text
-https://github.com/affandy21/devworks-server-os/releases
-```
+Release terbaru tersedia di halaman [GitHub Releases](https://github.com/affandy21/devworks-server-os/releases).
 
 Asset release:
 
@@ -28,10 +24,14 @@ Asset release:
 - `devworks-server-os-release-signing-key.asc`
 - `*.asc` detached GPG signatures
 
-Manual lengkap tersedia di:
+## Dokumentasi
+
+Manual utama:
+
 - [Devworks Server OS Manual](docs/DEVWORKS_SERVER_OS_MANUAL.md)
 
 Dokumen pendukung:
+
 - [Specification](docs/SPEC.md)
 - [ISO Build Guide](docs/ISO.md)
 - [VirtualBox Setup](docs/VIRTUALBOX_SETUP.md)
@@ -46,7 +46,7 @@ Dokumen pendukung:
 - Mendukung instalasi permanen ke disk virtual kosong.
 - Menyediakan desktop GUI ringan.
 - Devworks Control Center berjalan sebagai aplikasi native.
-- Monitoring realtime tersedia untuk CPU, memory, disk, network, dan service sistem.
+- Monitoring realtime tersedia untuk CPU, memori, disk, jaringan, dan service sistem.
 - Installer menggunakan konfirmasi disk manual untuk mengurangi risiko salah memilih disk.
 - Instalasi dual-boot otomatis belum didukung. Mode installer saat ini adalah `erase-disk`.
   
