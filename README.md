@@ -29,9 +29,7 @@ Asset release:
 - `*.asc` detached GPG signatures
 
 Manual lengkap tersedia di:
-```text
 - [Devworks Server OS Manual](docs/DEVWORKS_SERVER_OS_MANUAL.md)
-```
 
 Dokumen pendukung:
 - [Specification](docs/SPEC.md)
