@@ -40,16 +40,16 @@ Dokumen pendukung:
 - [Release Notes](docs/RELEASE_NOTES.md)
 - [Roadmap](docs/ROADMAP.md)
   
-## Status Singkat
+## Status Saat Ini
 
-- Bisa boot sebagai live ISO di VirtualBox.
-- Bisa dipasang permanen ke disk virtual kosong.
-- GUI tersedia dengan tema dan wallpaper Devworks.
-- Devworks Control Center berjalan sebagai aplikasi native, bukan browser/webview.
-- Monitoring CPU, memory, disk, network, dan service tersedia dengan grafik realtime.
-- Installer memakai manual confirm disk untuk mengurangi risiko salah pilih disk.
-- Dualboot otomatis belum didukung. Mode installer saat ini adalah `erase-disk`.
-
+- Dapat dijalankan sebagai live ISO di VirtualBox.
+- Mendukung instalasi permanen ke disk virtual kosong.
+- Menyediakan desktop GUI ringan.
+- Devworks Control Center berjalan sebagai aplikasi native.
+- Monitoring realtime tersedia untuk CPU, memory, disk, network, dan service sistem.
+- Installer menggunakan konfirmasi disk manual untuk mengurangi risiko salah memilih disk.
+- Instalasi dual-boot otomatis belum didukung. Mode installer saat ini adalah `erase-disk`.
+  
 ## File ISO
 
 ```text
