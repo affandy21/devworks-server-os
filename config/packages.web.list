@@ -1,0 +1,6 @@
+# Paket untuk server web dan reverse proxy.
+nginx
+certbot
+python3-certbot-nginx
+apache2-utils
+

@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -e
+
+lb config noauto \
+  --mode debian \
+  --distribution bookworm \
+  --archive-areas "main contrib non-free-firmware" \
+  --binary-images iso-hybrid \
+  --debian-installer live \
+  --security false \
+  --apt-indices false \
+  --bootappend-live "boot=live components hostname=devworks-server username=devworks user-fullname=Devworks" \
+  "${@}"

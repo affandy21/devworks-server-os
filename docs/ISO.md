@@ -1,0 +1,59 @@
+# Devworks Server OS ISO
+
+Dokumen ini merangkum status ISO Devworks Server OS. Manual lengkap ada di `docs/DEVWORKS_SERVER_OS_MANUAL.md`.
+
+## File ISO
+
+```text
+dist/devworks-server-os.iso
+dist/devworks-server-os-autoinstall.iso
+```
+
+Checksum build terakhir:
+
+```text
+devworks-server-os.iso
+SHA256: f4ebde934a5da0391b8f82f11a3682ed785e76435085a9e19dacc381b167b7e5
+
+devworks-server-os-autoinstall.iso
+SHA256: d31a48c842c81ca9f313e4d4a06d0e02081db24554cea915776678175addb921
+```
+
+## Status
+
+Sudah tersedia:
+
+- ISO bootable berbasis Debian.
+- Desktop GUI ringan.
+- Wallpaper dan tema Devworks.
+- Devworks Control Center native.
+- Shortcut Devworks Control Center di desktop.
+- Installer permanen ke disk.
+- Konfirmasi manual disk untuk ISO standar.
+- Profil autoinstall khusus VirtualBox.
+
+Tidak lagi berlaku:
+
+- Status lama yang menyebut installer permanen belum tersedia.
+- Status lama yang menyebut Control Center otomatis terbuka saat startup.
+
+## Rekomendasi Pemakaian
+
+Gunakan ISO standar untuk:
+
+- VirtualBox manual test.
+- PC server kosong.
+- Laptop/PC uji tanpa data penting.
+
+Gunakan ISO autoinstall hanya untuk:
+
+- VirtualBox.
+- Disk uji yang boleh dihapus otomatis.
+- Pipeline test yang memang menargetkan `/dev/sda`.
+
+## Catatan Dualboot
+
+Dualboot otomatis belum didukung. Manual confirm disk hanya mengurangi risiko salah pilih disk, bukan membuat installer non-destructive.
+
+Untuk dualboot dibutuhkan workflow baru yang bisa resize partisi, memilih partisi kosong, memasang GRUB tanpa menghapus OS lama, dan melakukan backup tabel partisi.
+

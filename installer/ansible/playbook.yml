@@ -1,0 +1,16 @@
+---
+- name: Configure Devworks Server OS
+  hosts: devworks
+  become: true
+  vars:
+    devworks_hostname: devworks-server
+    devworks_ssh_port: 22
+    devworks_enable_gui: true
+    devworks_enable_admin_ui: true
+    devworks_enable_ai: true
+    devworks_tls_mode: self-signed
+  roles:
+    - devworks-base
+    - devworks-security
+    - devworks-services
+    - devworks-gui

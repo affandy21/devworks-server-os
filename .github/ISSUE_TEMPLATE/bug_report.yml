@@ -1,0 +1,56 @@
+name: Bug Report
+description: Report a reproducible Devworks Server OS problem
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting a problem. Please include enough detail to reproduce it safely.
+  - type: input
+    id: version
+    attributes:
+      label: Devworks Server OS version or ISO checksum
+      placeholder: "SHA256 or release tag"
+    validations:
+      required: true
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Environment
+      options:
+        - VirtualBox
+        - Physical PC/server
+        - Other VM
+    validations:
+      required: true
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What happened?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction steps
+      placeholder: |
+        1. Boot ISO
+        2. Run installer
+        3. Reboot
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or screenshots
+      description: Do not paste passwords, keys, or private tokens.
+

@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Devworks Server OS</title>
+    <link rel="icon" href="assets/favicon.png">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-icon" aria-hidden="true">
+          <img src="assets/devworks-logo.png" alt="">
+        </div>
+        <div>
+          <strong>Devworks Server OS</strong>
+          <span id="hostname">devworks-server</span>
+        </div>
+      </div>
+      <nav aria-label="Navigasi utama">
+        <a class="active" href="#dashboard">Dashboard</a>
+        <a href="#performance">Performance</a>
+        <a href="#services">Services</a>
+        <a href="#runtime">Runtime</a>
+        <a href="#software">Software</a>
+        <a href="#security">Security</a>
+      </nav>
+      <div class="sidebar-footer">
+        <span id="connection-state" class="status-pill">Connecting</span>
+      </div>
+    </aside>
+
+    <main>
+      <header class="titlebar">
+        <div>
+          <p class="eyebrow">Devworks Server Manager</p>
+          <h1>Ringkasan kondisi server</h1>
+        </div>
+        <div class="title-actions">
+          <span>Last refresh <strong id="last-refresh">-</strong></span>
+          <button data-refresh>Refresh</button>
+        </div>
+      </header>
+
+      <section class="system-strip" aria-label="Identitas sistem">
+        <div><span>Platform</span><strong id="platform">Loading</strong></div>
+        <div><span>Kernel</span><strong id="kernel">Loading</strong></div>
+        <div><span>Uptime</span><strong id="uptime">Loading</strong></div>
+      </section>
+
+      <section class="metrics" id="dashboard" aria-label="Metrik realtime">
+        <article data-metric="cpu">
+          <span>Processor</span>
+          <strong>0%</strong>
+          <small>Loading</small>
+          <div class="meter"><i></i></div>
+        </article>
+        <article data-metric="memory">
+          <span>Memory</span>
+          <strong>0%</strong>
+          <small>Loading</small>
+          <div class="meter"><i></i></div>
+        </article>
+        <article data-metric="disk">
+          <span>System Disk</span>
+          <strong>0%</strong>
+          <small>Loading</small>
+          <div class="meter"><i></i></div>
+        </article>
+        <article data-metric="gpu">
+          <span>AI GPU</span>
+          <strong>N/A</strong>
+          <small>Loading</small>
+          <div class="meter"><i></i></div>
+        </article>
+      </section>
+
+      <section class="performance-grid" id="performance" aria-label="Performance realtime">
+        <article class="perf-card" data-chart-card="cpu">
+          <div class="perf-head">
+            <div>
+              <h2>CPU</h2>
+              <p>Utilization</p>
+            </div>
+            <strong data-chart-value="cpu">0%</strong>
+          </div>
+          <canvas data-chart="cpu" height="150"></canvas>
+        </article>
+        <article class="perf-card" data-chart-card="memory">
+          <div class="perf-head">
+            <div>
+              <h2>Memory</h2>
+              <p>Usage</p>
+            </div>
+            <strong data-chart-value="memory">0%</strong>
+          </div>
+          <canvas data-chart="memory" height="150"></canvas>
+        </article>
+        <article class="perf-card" data-chart-card="disk">
+          <div class="perf-head">
+            <div>
+              <h2>Disk</h2>
+              <p>System volume</p>
+            </div>
+            <strong data-chart-value="disk">0%</strong>
+          </div>
+          <canvas data-chart="disk" height="150"></canvas>
+        </article>
+        <article class="perf-card" data-chart-card="network">
+          <div class="perf-head">
+            <div>
+              <h2>Network</h2>
+              <p>RX + TX throughput</p>
+            </div>
+            <strong data-chart-value="network">0 B/s</strong>
+          </div>
+          <canvas data-chart="network" height="150"></canvas>
+        </article>
+        <article class="perf-card wide" data-chart-card="gpu">
+          <div class="perf-head">
+            <div>
+              <h2>GPU</h2>
+              <p>AI accelerator utilization</p>
+            </div>
+            <strong data-chart-value="gpu">N/A</strong>
+          </div>
+          <canvas data-chart="gpu" height="160"></canvas>
+        </article>
+      </section>
+
+      <section class="workspace">
+        <article class="panel" id="services">
+          <div class="panel-head">
+            <div>
+              <h2>Services</h2>
+              <p>Status service inti OS.</p>
+            </div>
+            <button data-refresh>Scan</button>
+          </div>
+          <ul class="status-list" id="service-list"></ul>
+        </article>
+
+        <article class="panel" id="runtime">
+          <div class="panel-head">
+            <div>
+              <h2>Runtime</h2>
+              <p>Container dan AI accelerator.</p>
+            </div>
+          </div>
+          <h3>Containers</h3>
+          <div id="container-list" class="runtime-list"></div>
+          <h3>GPU</h3>
+          <div id="gpu-list" class="runtime-list"></div>
+        </article>
+
+        <article class="panel wide" id="software">
+          <div class="panel-head">
+            <div>
+              <h2>Software</h2>
+              <p>Install paket server dari katalog aman.</p>
+            </div>
+            <span id="install-state" class="status-pill">Checking</span>
+          </div>
+          <div class="software-toolbar">
+            <input id="package-search" type="search" placeholder="Cari nginx, database, monitoring, AI...">
+          </div>
+          <div id="package-list" class="package-list"></div>
+        </article>
+
+        <article class="panel wide" id="security">
+          <div class="panel-head">
+            <div>
+              <h2>Security Baseline</h2>
+              <p>Pengaturan awal untuk server production.</p>
+            </div>
+          </div>
+          <div class="checklist">
+            <label><input type="checkbox" checked> SSH root login nonaktif</label>
+            <label><input type="checkbox" checked> Firewall default deny incoming</label>
+            <label><input type="checkbox" checked> Security update otomatis</label>
+            <label><input type="checkbox"> Backup terenkripsi aktif</label>
+          </div>
+        </article>
+
+        <article class="panel wide">
+          <div class="panel-head">
+            <div>
+              <h2>Activity</h2>
+              <p>Log operasi terakhir dari panel.</p>
+            </div>
+          </div>
+          <pre id="activity-log">Panel siap.</pre>
+        </article>
+      </section>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>

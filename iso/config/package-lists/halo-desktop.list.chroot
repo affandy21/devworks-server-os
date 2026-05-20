@@ -1,0 +1,12 @@
+xorg
+dbus-x11
+lightdm
+lightdm-gtk-greeter
+xfce4
+xfce4-terminal
+network-manager
+policykit-1
+python3-gi
+gir1.2-gtk-3.0
+fonts-dejavu
+fonts-liberation

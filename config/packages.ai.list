@@ -1,0 +1,10 @@
+# Paket host untuk workload AI.
+# Runtime AI utama disarankan berjalan di container agar dependency tidak merusak OS.
+python3
+python3-venv
+python3-pip
+build-essential
+pkg-config
+cmake
+git-lfs
+

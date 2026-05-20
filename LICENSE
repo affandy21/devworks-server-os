@@ -1,0 +1,15 @@
+Copyright (c) 2026 Devworks
+
+All rights reserved.
+
+This repository contains Devworks Server OS source code, configuration,
+documentation, branding assets, build scripts, and installer automation.
+
+No permission is granted to copy, modify, distribute, sublicense, or use this
+software or the Devworks branding except by explicit written permission from
+the copyright holder.
+
+Third-party components distributed or referenced by this project, including
+Debian packages and other open source software, remain governed by their
+respective licenses.
+

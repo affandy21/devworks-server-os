@@ -1,0 +1,24 @@
+# Paket dasar untuk Devworks Server OS.
+ca-certificates
+curl
+gnupg
+lsb-release
+sudo
+python3
+vim
+nano
+tmux
+htop
+iotop
+sysstat
+unattended-upgrades
+apt-listchanges
+ufw
+fail2ban
+openssh-server
+chrony
+jq
+git
+rsync
+smartmontools
+logrotate

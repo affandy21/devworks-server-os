@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Devworks Control Center
+Comment=Open native Devworks Server OS monitoring software
+Exec=/usr/local/bin/devworks-open-admin
+Icon=devworks-control-center
+Terminal=false
+Categories=System;Monitor;

@@ -1,0 +1,55 @@
+# Release Notes
+
+## Devworks Server OS Preview
+
+Tanggal dokumentasi: 2026-05-20
+
+## Ringkasan
+
+Release preview ini menyiapkan Devworks Server OS sebagai ISO bootable berbasis Debian dengan GUI Devworks, Devworks Control Center native, dan installer permanen ke disk.
+
+## ISO
+
+```text
+dist/devworks-server-os.iso
+SHA256: f4ebde934a5da0391b8f82f11a3682ed785e76435085a9e19dacc381b167b7e5
+
+dist/devworks-server-os-autoinstall.iso
+SHA256: d31a48c842c81ca9f313e4d4a06d0e02081db24554cea915776678175addb921
+```
+
+## Fitur Baru
+
+- Installer permanen ke disk.
+- Manual confirm disk untuk ISO standar.
+- Profil autoinstall untuk VirtualBox.
+- Desktop GUI dengan wallpaper Devworks.
+- Shortcut Devworks Control Center di desktop.
+- Devworks Control Center native GTK.
+- Grafik realtime untuk CPU, memory, disk, dan network.
+- Icon Applications grid Devworks.
+- Control Center tidak lagi terbuka otomatis saat startup.
+
+## Perbaikan
+
+- Wallpaper default disesuaikan dengan aset Devworks yang diberikan.
+- Control Center dibuat muat di layar VirtualBox 1024x768.
+- Shortcut desktop dibuat tersedia setelah instalasi permanen.
+- Icon yang hilang atau berubah menjadi tanda seru diperbaiki.
+- Icon Applications dikembalikan ke gaya grid, bukan logo utama Devworks.
+
+## Batasan
+
+- Dualboot otomatis belum didukung.
+- Mode installer saat ini masih `erase-disk`.
+- ISO autoinstall tidak boleh dipakai pada mesin yang memiliki data penting.
+- Validasi server fisik tetap harus dilakukan sebelum production.
+
+## Rekomendasi Upgrade Berikutnya
+
+- First boot wizard.
+- Installer dualboot non-destructive.
+- Service manager untuk web dan AI.
+- Hardening SSH production.
+- Release signing dan repository update internal.
+

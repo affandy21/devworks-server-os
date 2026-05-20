@@ -1,0 +1,13 @@
+[Unit]
+Description=Devworks Server OS VirtualBox autoinstall
+After=network-online.target
+Wants=network-online.target
+ConditionPathExists=/opt/devworks/installer/profiles/virtualbox-autoinstall.env
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/sbin/devworks-autoinstall-runner
+
+[Install]
+WantedBy=multi-user.target

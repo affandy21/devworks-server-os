@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#07142a"/>
+      <stop offset="0.58" stop-color="#0b1e3d"/>
+      <stop offset="1" stop-color="#102a4f"/>
+    </linearGradient>
+    <linearGradient id="cyan" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#77f4f1"/>
+      <stop offset="1" stop-color="#35bdf2"/>
+    </linearGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#bg)"/>
+  <path d="M0 120 C320 40 510 190 760 110 C1030 24 1250 55 1480 0 L1920 0 L1920 1080 L0 1080Z" fill="#0e2445" opacity=".42"/>
+  <path d="M1120 210 h420 a170 170 0 0 1 0 340 h-420z" fill="none" stroke="#132d56" stroke-width="86" opacity=".68"/>
+  <path d="M1120 210 h420 a170 170 0 0 1 0 340 h-420z" fill="none" stroke="url(#cyan)" stroke-width="12" stroke-linecap="round" stroke-dasharray="500 96 320 120" opacity=".9" filter="url(#glow)"/>
+  <g stroke="url(#cyan)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)">
+    <path d="M410 660 V370 h250"/>
+    <path d="M500 660 V455 h160"/>
+    <path d="M585 660 V540 h170"/>
+    <path d="M410 470 H300"/>
+    <path d="M500 560 H350"/>
+    <circle cx="410" cy="370" r="18" fill="#0b1e3d"/>
+    <circle cx="500" cy="455" r="18" fill="#0b1e3d"/>
+    <circle cx="585" cy="540" r="18" fill="#0b1e3d"/>
+    <circle cx="300" cy="470" r="18" fill="#0b1e3d"/>
+    <circle cx="350" cy="560" r="18" fill="#0b1e3d"/>
+    <circle cx="755" cy="540" r="18" fill="#0b1e3d"/>
+  </g>
+  <text x="260" y="190" font-family="Segoe UI, DejaVu Sans, sans-serif" font-size="78" font-weight="800" fill="#ffffff">Devworks</text>
+  <text x="263" y="248" font-family="Segoe UI, DejaVu Sans, sans-serif" font-size="30" fill="#77f4f1">Server OS</text>
+  <rect x="262" y="286" width="520" height="3" rx="1.5" fill="url(#cyan)"/>
+  <text x="263" y="344" font-family="Segoe UI, DejaVu Sans, sans-serif" font-size="24" fill="#cde7f7">Stable Linux platform for web services, AI runtime, and realtime monitoring.</text>
+  <g opacity=".2" stroke="#77f4f1" stroke-width="1">
+    <path d="M0 900 H1920 M0 820 H1920 M0 740 H1920"/>
+    <path d="M260 1080 V720 M520 1080 V700 M780 1080 V760 M1040 1080 V720 M1300 1080 V760 M1560 1080 V700"/>
+  </g>
+</svg>

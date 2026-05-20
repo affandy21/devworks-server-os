@@ -1,0 +1,57 @@
+# Devworks Server OS generated artifacts
+dist/*.iso
+dist/*.img
+dist/*.qcow2
+dist/*.vdi
+dist/*.vmdk
+dist/*.raw
+
+# live-build generated working directories
+iso/chroot/
+iso/cache/
+iso/binary/
+iso/.build/
+iso/config/hooks/live/
+iso/config/hooks/normal/
+iso/*.iso
+iso/*.img
+iso/*.log
+
+# Test screenshots and temporary visual evidence stored at repository root
+/*.png
+/*.jpg
+/*.jpeg
+/*.webp
+
+# Logs
+*.log
+!docs/**/*.log
+
+# Virtual machine files
+*.vbox
+*.vbox-prev
+*.vdi
+*.vmdk
+*.qcow2
+*.nvram
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+
+# Python/runtime cache
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+
+# Secrets and local overrides
+.env
+*.env.local
+installer/config.env
+*.pem
+*.key
+*.crt

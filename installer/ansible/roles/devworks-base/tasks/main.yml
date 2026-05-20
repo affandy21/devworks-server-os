@@ -1,0 +1,42 @@
+---
+- name: Set hostname
+  ansible.builtin.hostname:
+    name: "{{ devworks_hostname }}"
+
+- name: Install base packages
+  ansible.builtin.apt:
+    name:
+      - ca-certificates
+      - curl
+      - gnupg
+      - jq
+      - vim
+      - nano
+      - htop
+      - tmux
+      - sysstat
+      - smartmontools
+      - chrony
+    state: present
+    update_cache: true
+
+- name: Enable chrony
+  ansible.builtin.systemd:
+    name: chrony
+    enabled: true
+    state: started
+
+- name: Write Devworks os-release
+  ansible.builtin.copy:
+    dest: /etc/os-release
+    mode: "0644"
+    content: |
+      PRETTY_NAME="Devworks Server OS"
+      NAME="Devworks Server OS"
+      VERSION_ID="1.0"
+      VERSION="1.0"
+      ID=devworks
+      ID_LIKE=debian
+      HOME_URL="https://devworks.local"
+      SUPPORT_URL="https://devworks.local"
+      BUG_REPORT_URL="https://devworks.local"

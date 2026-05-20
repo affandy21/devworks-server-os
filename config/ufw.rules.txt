@@ -1,0 +1,14 @@
+# Default firewall policy.
+default deny incoming
+default allow outgoing
+
+# Required services.
+allow OpenSSH
+allow 80/tcp
+allow 443/tcp
+
+# Optional local admin UI. Restrict to VPN/LAN in production.
+allow from 10.0.0.0/8 to any port 8088 proto tcp
+allow from 172.16.0.0/12 to any port 8088 proto tcp
+allow from 192.168.0.0/16 to any port 8088 proto tcp
+

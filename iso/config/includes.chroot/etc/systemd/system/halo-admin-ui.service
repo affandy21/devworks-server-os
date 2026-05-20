@@ -1,0 +1,17 @@
+[Unit]
+Description=Devworks Admin UI
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/devworks/admin-ui
+Environment=DEVWORKS_HOST=0.0.0.0
+Environment=DEVWORKS_PORT=8088
+Environment=DEVWORKS_ENABLE_INSTALL=0
+ExecStart=/usr/bin/python3 /opt/devworks/admin-ui/server.py
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

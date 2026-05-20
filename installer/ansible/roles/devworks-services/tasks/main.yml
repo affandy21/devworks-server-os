@@ -1,0 +1,88 @@
+---
+- name: Install nginx and podman
+  ansible.builtin.apt:
+    name:
+      - nginx-light
+      - podman
+      - python3
+    state: present
+    update_cache: true
+
+- name: Create web root
+  ansible.builtin.file:
+    path: /srv/devworks/web
+    state: directory
+    mode: "0755"
+
+- name: Install default web page
+  ansible.builtin.copy:
+    dest: /srv/devworks/web/index.html
+    mode: "0644"
+    content: |
+      <!doctype html>
+      <html><head><meta charset="utf-8"><title>Devworks Server OS</title></head>
+      <body><h1>Devworks Server OS</h1><p>Web service is online.</p></body></html>
+
+- name: Configure nginx site
+  ansible.builtin.copy:
+    dest: /etc/nginx/sites-available/devworks.conf
+    mode: "0644"
+    content: |
+      server {
+          listen 80 default_server;
+          server_name _;
+          root /srv/devworks/web;
+          index index.html;
+          location / { try_files $uri $uri/ =404; }
+          location /health {
+              add_header Content-Type text/plain;
+              return 200 "ok\n";
+          }
+      }
+  notify: Reload nginx
+
+- name: Enable nginx site
+  ansible.builtin.file:
+    src: /etc/nginx/sites-available/devworks.conf
+    dest: /etc/nginx/sites-enabled/devworks.conf
+    state: link
+    force: true
+
+- name: Disable default nginx site
+  ansible.builtin.file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+
+- name: Enable nginx
+  ansible.builtin.systemd:
+    name: nginx
+    enabled: true
+    state: started
+
+- name: Install AI placeholder service
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/devworks-ai.service
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Devworks AI placeholder service
+      After=network-online.target
+      Wants=network-online.target
+
+      [Service]
+      Type=simple
+      ExecStart=/usr/bin/python3 -m http.server 11434 --bind 0.0.0.0
+      Restart=on-failure
+      RestartSec=5
+
+      [Install]
+      WantedBy=multi-user.target
+  when: devworks_enable_ai | bool
+
+- name: Enable AI service
+  ansible.builtin.systemd:
+    name: devworks-ai
+    enabled: true
+    state: started
+    daemon_reload: true
+  when: devworks_enable_ai | bool

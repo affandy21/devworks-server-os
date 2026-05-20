@@ -1,0 +1,28 @@
+FROM debian:bookworm
+
+RUN apt-get update && apt-get install -y \
+    live-build \
+    ca-certificates \
+    rsync \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /build
+
+COPY . /build/
+
+RUN chmod +x /build/scripts/build-iso.sh \
+    && chmod +x /build/iso/auto/config \
+    && find /build/iso/config/hooks/normal -maxdepth 1 -type f -name '*.chroot' -exec chmod +x {} +
+
+CMD ["/bin/bash", "-c", "\
+    echo '[*] Copying to tmpfs for build...' && \
+    mkdir -p /tmp/build && \
+    cp -r /build/* /tmp/build/ && \
+    cd /tmp/build && \
+    echo '[*] Running build...' && \
+    bash scripts/build-iso.sh && \
+    echo '[*] Copying result back...' && \
+    mkdir -p /build/dist && \
+    cp /tmp/build/dist/* /build/dist/ 2>/dev/null || true && \
+    echo '[✓] Build complete!'\
+"]

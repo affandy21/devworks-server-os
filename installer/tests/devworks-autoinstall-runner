@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+LOG="/var/log/devworks-autoinstall.log"
+MARKER="/run/devworks-autoinstall.done"
+
+if [[ -f "${MARKER}" ]]; then
+  exit 0
+fi
+
+exec > >(tee -a "${LOG}" /dev/console) 2>&1
+
+echo "=== Devworks VirtualBox autoinstall started: $(date -Is) ==="
+echo "This run is destructive for TARGET_DISK from virtualbox-autoinstall.env."
+
+touch "${MARKER}"
+bash /opt/devworks/installer/devworks-install.sh \
+  --config /opt/devworks/installer/profiles/virtualbox-autoinstall.env
+
+echo "=== Devworks VirtualBox autoinstall finished: $(date -Is) ==="
+sync
+systemctl poweroff

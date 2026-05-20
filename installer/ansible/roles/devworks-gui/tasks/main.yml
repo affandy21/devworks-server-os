@@ -1,0 +1,32 @@
+---
+- name: Install GUI packages
+  ansible.builtin.apt:
+    name:
+      - xorg
+      - dbus-x11
+      - lightdm
+      - lightdm-gtk-greeter
+      - xfce4
+      - xfce4-terminal
+      - python3-gi
+      - gir1.2-gtk-3.0
+      - fonts-dejavu
+      - fonts-liberation
+    state: present
+    update_cache: true
+  when: devworks_enable_gui | bool
+
+- name: Enable graphical target
+  ansible.builtin.systemd:
+    name: lightdm
+    enabled: true
+    state: started
+  when: devworks_enable_gui | bool
+
+- name: Set graphical default target
+  ansible.builtin.file:
+    src: /lib/systemd/system/graphical.target
+    dest: /etc/systemd/system/default.target
+    state: link
+    force: true
+  when: devworks_enable_gui | bool
