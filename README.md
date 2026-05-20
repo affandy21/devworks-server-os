@@ -38,6 +38,8 @@ docs/BUILD_RESULT.md
 docs/ISO_BUILD_STATUS.md
 docs/RELEASE_NOTES.md
 docs/ROADMAP.md
+docs/THIRD_PARTY_NOTICES.md
+docs/SOURCE_CODE_OFFER.md
 ```
 
 ## Status Singkat
@@ -80,6 +82,14 @@ scripts/      skrip build dan helper
 services/     unit systemd Devworks
 ```
 
+## Package Manifest
+
+Setelah OS terpasang, manifest paket dapat dibuat dengan:
+
+```bash
+bash scripts/generate-package-manifest.sh devworks-package-manifest.tsv
+```
+
 ## Build ISO
 
 Build dilakukan dari Linux/Debian builder:
@@ -109,3 +119,12 @@ ERASE /dev/sda
 ```
 
 Jangan gunakan ISO autoinstall di PC/laptop yang memiliki data penting.
+
+## Upstream dan Source Code
+
+Devworks Server OS memakai komponen upstream seperti Debian dan Linux kernel. Atribusi, link upstream, dan panduan mendapatkan source code tersedia di:
+
+```text
+docs/THIRD_PARTY_NOTICES.md
+docs/SOURCE_CODE_OFFER.md
+```

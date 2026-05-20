@@ -19,7 +19,13 @@ This project may install or configure third-party components such as:
 
 Each third-party component remains covered by its own upstream license. Devworks Server OS does not claim ownership of Debian, Linux, or other upstream projects.
 
+Additional attribution and source locations are documented in:
+
+```text
+docs/THIRD_PARTY_NOTICES.md
+docs/SOURCE_CODE_OFFER.md
+```
+
 ## Branding
 
 Devworks names, logos, icons, wallpaper, and theme assets are project branding assets and are not licensed for reuse outside this project without permission.
-

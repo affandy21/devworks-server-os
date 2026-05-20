@@ -52,4 +52,4 @@ SHA256: d31a48c842c81ca9f313e4d4a06d0e02081db24554cea915776678175addb921
 - Service manager untuk web dan AI.
 - Hardening SSH production.
 - Release signing dan repository update internal.
-
+- Package manifest dan source-code offer yang lebih formal untuk release production.

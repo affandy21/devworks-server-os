@@ -521,3 +521,20 @@ Status:
 Preview stabil untuk VirtualBox dan server kosong berbasis Intel/AMD 64-bit.
 ```
 
+## 25. Upstream dan Source Code
+
+Devworks Server OS memakai komponen upstream seperti Debian, Linux kernel, GNU utilities, systemd, XFCE, LightDM, OpenSSH, Nginx, UFW, dan Fail2ban.
+
+Atribusi dan link source code upstream tersedia di:
+
+```text
+docs/THIRD_PARTY_NOTICES.md
+docs/SOURCE_CODE_OFFER.md
+```
+
+Catatan penting:
+
+- Linux adalah merek dagang Linus Torvalds.
+- Debian adalah merek dagang Software in the Public Interest, Inc.
+- Devworks Server OS tidak diklaim sebagai produk resmi Debian atau kernel.org.
+- Jika suatu release memodifikasi Linux kernel, source code kernel hasil modifikasi harus dipublikasikan atau ditawarkan sesuai kewajiban lisensinya.
