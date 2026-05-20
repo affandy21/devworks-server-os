@@ -1,6 +1,26 @@
 # Devworks Server OS
 
+[![Release](https://img.shields.io/github/v/release/affandy21/devworks-server-os?include_prereleases&label=release)](https://github.com/affandy21/devworks-server-os/releases)
+[![Status](https://img.shields.io/badge/status-preview-blue)](docs/RELEASE_NOTES.md)
+[![Platform](https://img.shields.io/badge/platform-amd64%20Intel%2FAMD-lightgrey)](docs/DEVWORKS_SERVER_OS_MANUAL.md)
+[![License](https://img.shields.io/badge/license-proprietary-red)](LICENSE)
+
 Devworks Server OS adalah sistem Linux kustom berbasis Debian Stable untuk server web, runtime AI, dan monitoring lokal. Build saat ini sudah memiliki ISO bootable, desktop GUI ringan, Devworks Control Center native, dan installer permanen ke disk.
+
+## Download
+
+Release terbaru tersedia di:
+
+```text
+https://github.com/affandy21/devworks-server-os/releases
+```
+
+Asset release:
+
+- `devworks-server-os.iso`
+- `devworks-server-os-autoinstall.iso`
+- `devworks-server-os.iso.sha256`
+- `devworks-server-os-autoinstall.iso.sha256`
 
 Manual lengkap:
 
