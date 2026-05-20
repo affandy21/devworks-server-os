@@ -115,3 +115,10 @@ Debian is a trademark of Software in the Public Interest, Inc.
 
 Other names may be trademarks of their respective owners. Devworks Server OS is not endorsed by Debian, Linus Torvalds, kernel.org, XFCE, or any other upstream project unless explicitly stated.
 
+## Source Requests
+
+Source-code and compliance requests for Devworks-specific files can be submitted through:
+
+```text
+https://github.com/affandy21/devworks-server-os/issues/new/choose
+```

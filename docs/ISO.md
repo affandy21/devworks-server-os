@@ -19,6 +19,21 @@ devworks-server-os-autoinstall.iso
 SHA256: d31a48c842c81ca9f313e4d4a06d0e02081db24554cea915776678175addb921
 ```
 
+Release asset tambahan:
+
+```text
+devworks-server-os-package-manifest.tsv
+devworks-server-os-package-manifest.tsv.sha256
+devworks-server-os-release-signing-key.asc
+*.asc detached GPG signatures
+```
+
+GPG signing key fingerprint:
+
+```text
+426072F517789C47A914345A4F53E388EE9884EA
+```
+
 ## Status
 
 Sudah tersedia:
@@ -56,4 +71,3 @@ Gunakan ISO autoinstall hanya untuk:
 Dualboot otomatis belum didukung. Manual confirm disk hanya mengurangi risiko salah pilih disk, bukan membuat installer non-destructive.
 
 Untuk dualboot dibutuhkan workflow baru yang bisa resize partisi, memilih partisi kosong, memasang GRUB tanpa menghapus OS lama, dan melakukan backup tabel partisi.
-

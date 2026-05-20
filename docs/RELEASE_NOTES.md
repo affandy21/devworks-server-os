@@ -18,6 +18,18 @@ dist/devworks-server-os-autoinstall.iso
 SHA256: d31a48c842c81ca9f313e4d4a06d0e02081db24554cea915776678175addb921
 ```
 
+Release ini juga menyertakan:
+
+- Package manifest dari ISO final.
+- Detached GPG signatures untuk ISO, checksum, dan manifest.
+- Public release signing key.
+
+GPG fingerprint:
+
+```text
+426072F517789C47A914345A4F53E388EE9884EA
+```
+
 ## Fitur Baru
 
 - Installer permanen ke disk.
@@ -51,5 +63,5 @@ SHA256: d31a48c842c81ca9f313e4d4a06d0e02081db24554cea915776678175addb921
 - Installer dualboot non-destructive.
 - Service manager untuk web dan AI.
 - Hardening SSH production.
-- Release signing dan repository update internal.
-- Package manifest dan source-code offer yang lebih formal untuk release production.
+- Repository update internal.
+- Source request email khusus untuk release production.

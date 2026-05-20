@@ -21,6 +21,9 @@ Asset release:
 - `devworks-server-os-autoinstall.iso`
 - `devworks-server-os.iso.sha256`
 - `devworks-server-os-autoinstall.iso.sha256`
+- `devworks-server-os-package-manifest.tsv`
+- `devworks-server-os-release-signing-key.asc`
+- `*.asc` detached GPG signatures
 
 Manual lengkap:
 
@@ -84,10 +87,35 @@ services/     unit systemd Devworks
 
 ## Package Manifest
 
-Setelah OS terpasang, manifest paket dapat dibuat dengan:
+Manifest paket ISO final tersedia di release asset:
+
+```text
+devworks-server-os-package-manifest.tsv
+devworks-server-os-package-manifest.tsv.sha256
+```
+
+Setelah OS terpasang, manifest paket baru juga dapat dibuat dengan:
 
 ```bash
 bash scripts/generate-package-manifest.sh devworks-package-manifest.tsv
+```
+
+## Verifikasi ISO
+
+Fingerprint release signing key:
+
+```text
+426072F517789C47A914345A4F53E388EE9884EA
+```
+
+Import public key dan verifikasi signature:
+
+```bash
+gpg --import devworks-server-os-release-signing-key.asc
+gpg --verify devworks-server-os.iso.asc devworks-server-os.iso
+gpg --verify devworks-server-os-autoinstall.iso.asc devworks-server-os-autoinstall.iso
+sha256sum -c devworks-server-os.iso.sha256
+sha256sum -c devworks-server-os-autoinstall.iso.sha256
 ```
 
 ## Build ISO
@@ -127,4 +155,10 @@ Devworks Server OS memakai komponen upstream seperti Debian dan Linux kernel. At
 ```text
 docs/THIRD_PARTY_NOTICES.md
 docs/SOURCE_CODE_OFFER.md
+```
+
+Permintaan source code dan compliance dapat diajukan melalui GitHub Issues:
+
+```text
+https://github.com/affandy21/devworks-server-os/issues/new/choose
 ```

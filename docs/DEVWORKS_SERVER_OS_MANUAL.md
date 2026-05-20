@@ -56,6 +56,15 @@ devworks-server-os-autoinstall.iso
 SHA256: d31a48c842c81ca9f313e4d4a06d0e02081db24554cea915776678175addb921
 ```
 
+Release tambahan:
+
+```text
+devworks-server-os-package-manifest.tsv
+devworks-server-os-package-manifest.tsv.sha256
+devworks-server-os-release-signing-key.asc
+*.asc detached GPG signatures
+```
+
 Fungsi SHA256:
 
 - Memastikan file ISO tidak rusak.
@@ -67,6 +76,20 @@ Contoh cek checksum di Windows PowerShell:
 ```powershell
 Get-FileHash .\dist\devworks-server-os.iso -Algorithm SHA256
 Get-FileHash .\dist\devworks-server-os-autoinstall.iso -Algorithm SHA256
+```
+
+Fingerprint GPG signing key:
+
+```text
+426072F517789C47A914345A4F53E388EE9884EA
+```
+
+Contoh verifikasi di Linux:
+
+```bash
+gpg --import devworks-server-os-release-signing-key.asc
+gpg --verify devworks-server-os.iso.asc devworks-server-os.iso
+sha256sum -c devworks-server-os.iso.sha256
 ```
 
 ## 4. Edisi ISO
@@ -530,6 +553,12 @@ Atribusi dan link source code upstream tersedia di:
 ```text
 docs/THIRD_PARTY_NOTICES.md
 docs/SOURCE_CODE_OFFER.md
+```
+
+Permintaan source code dan compliance:
+
+```text
+https://github.com/affandy21/devworks-server-os/issues/new/choose
 ```
 
 Catatan penting:

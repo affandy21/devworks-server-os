@@ -1,4 +1,5 @@
 # Devworks Server OS generated artifacts
+.release-work/
 dist/*.iso
 dist/*.img
 dist/*.qcow2

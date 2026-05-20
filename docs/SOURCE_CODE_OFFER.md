@@ -65,7 +65,16 @@ less /usr/share/doc/nginx/copyright
 
 ## Package Manifest
 
-For future releases, Devworks Server OS should publish a package manifest generated from the final ISO or installed system, for example:
+Devworks Server OS preview releases publish a package manifest generated from the final ISO.
+
+For this release:
+
+```text
+devworks-server-os-package-manifest.tsv
+devworks-server-os-package-manifest.tsv.sha256
+```
+
+A manifest can also be generated from an installed system:
 
 ```bash
 dpkg-query -W -f='${binary:Package}\t${Version}\t${Architecture}\n' > devworks-package-manifest.tsv
@@ -96,12 +105,30 @@ If a future Devworks release modifies the Linux kernel itself, the complete corr
 
 ## Written Requests
 
-For a public preview release, users should first use the repository and Debian source links above.
+For this public preview release, users should first use the repository and Debian source links above.
 
-For production distribution, Devworks should maintain a formal source request contact such as:
+Source-code and compliance requests can be submitted through GitHub Issues:
 
 ```text
-source-request@example.com
+https://github.com/affandy21/devworks-server-os/issues/new/choose
 ```
 
-Replace that placeholder with a real monitored address before commercial or wide public distribution.
+For commercial or wide production distribution, Devworks should also maintain a dedicated monitored email address for formal written requests.
+
+## Release Signing Key
+
+Preview release assets are signed with the Devworks Server OS release signing key:
+
+```text
+User ID: Devworks Server OS Release <affandy21@users.noreply.github.com>
+Fingerprint: 426072F517789C47A914345A4F53E388EE9884EA
+Public key asset: devworks-server-os-release-signing-key.asc
+```
+
+Verify an ISO:
+
+```bash
+gpg --import devworks-server-os-release-signing-key.asc
+gpg --verify devworks-server-os.iso.asc devworks-server-os.iso
+sha256sum -c devworks-server-os.iso.sha256
+```
