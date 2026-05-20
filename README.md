@@ -5,9 +5,10 @@
 [![Platform](https://img.shields.io/badge/platform-amd64%20Intel%2FAMD-lightgrey)](docs/DEVWORKS_SERVER_OS_MANUAL.md)
 [![License](https://img.shields.io/badge/license-proprietary-red)](LICENSE)
 
+
 Devworks Server OS adalah distribusi Linux kustom berbasis Debian Stable yang dirancang sebagai lingkungan pembelajaran dan pengembangan untuk deployment server web, runtime AI lokal, serta monitoring sistem.
 
-Build saat ini telah mencakup ISO bootable, desktop GUI ringan, Devworks Control Center berbasis aplikasi native, serta installer permanen ke disk. Sistem ini cocok digunakan untuk pembelajaran server secara langsung, eksperimen lokal, dan pengembangan di lingkungan yang terkontrol.
+Build saat ini telah mencakup ISO bootable, desktop GUI ringan, Devworks Control Center berbasis aplikasi native, serta installer permanen ke disk. Sistem ini cocok digunakan untuk pembelajaran server secara langsung, eksperimen lokal, dan pengembangan di lingkungan yang aman dan terkontrol.
 
 ## Download
 
@@ -27,26 +28,22 @@ Asset release:
 - `devworks-server-os-release-signing-key.asc`
 - `*.asc` detached GPG signatures
 
-Manual lengkap:
-
+Manual lengkap tersedia di:
 ```text
-docs/DEVWORKS_SERVER_OS_MANUAL.md
+- [Devworks Server OS Manual](docs/DEVWORKS_SERVER_OS_MANUAL.md)
 ```
 
 Dokumen pendukung:
-
 ```text
-docs/SPEC.md
-docs/ISO.md
-docs/VIRTUALBOX_SETUP.md
-docs/BUILD_RESULT.md
-docs/ISO_BUILD_STATUS.md
-docs/RELEASE_NOTES.md
-docs/ROADMAP.md
-docs/THIRD_PARTY_NOTICES.md
-docs/SOURCE_CODE_OFFER.md
+- [Specification](docs/SPEC.md)
+- [ISO Build Guide](docs/ISO.md)
+- [VirtualBox Setup](docs/VIRTUALBOX_SETUP.md)
+- [Build Result](docs/BUILD_RESULT.md)
+- [ISO Build Status](docs/ISO_BUILD_STATUS.md)
+- [Release Notes](docs/RELEASE_NOTES.md)
+- [Roadmap](docs/ROADMAP.md)
 ```
-
+  
 ## Status Singkat
 
 - Bisa boot sebagai live ISO di VirtualBox.
