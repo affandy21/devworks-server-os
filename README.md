@@ -5,7 +5,11 @@
 [![Platform](https://img.shields.io/badge/platform-amd64%20Intel%2FAMD-lightgrey)](docs/DEVWORKS_SERVER_OS_MANUAL.md)
 [![License](https://img.shields.io/badge/license-proprietary-red)](LICENSE)
 
-Devworks Server OS adalah sistem Linux kustom berbasis Debian Stable untuk server web, runtime AI, dan monitoring lokal. Build saat ini sudah memiliki ISO bootable, desktop GUI ringan, Devworks Control Center native, dan installer permanen ke disk.
+# Devworks Server OS
+
+Devworks Server OS adalah distribusi Linux kustom berbasis Debian Stable yang dirancang sebagai lingkungan pembelajaran dan pengembangan untuk deployment server web, runtime AI lokal, serta monitoring sistem.
+
+Build saat ini telah mencakup ISO bootable, desktop GUI ringan, Devworks Control Center berbasis aplikasi native, serta installer permanen ke disk. Sistem ini cocok digunakan untuk pembelajaran server secara langsung, eksperimen lokal, dan pengembangan di lingkungan yang terkontrol.
 
 ## Download
 
