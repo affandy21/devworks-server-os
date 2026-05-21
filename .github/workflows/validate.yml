@@ -1,0 +1,54 @@
+name: Validate
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  repository:
+    name: Repository validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check shell syntax
+        run: |
+          set -euo pipefail
+          find scripts installer -type f \
+            \( -name '*.sh' -o -name 'devworks-install.sh' -o -name 'devworks-autoinstall-runner' \) \
+            -print0 | xargs -0 -n1 bash -n
+
+      - name: Check required documentation
+        run: |
+          set -euo pipefail
+          test -f README.md
+          test -f LICENSE
+          test -f NOTICE.md
+          test -f SECURITY.md
+          test -f docs/DEVWORKS_SERVER_OS_MANUAL.md
+          test -f docs/THIRD_PARTY_NOTICES.md
+          test -f docs/SOURCE_CODE_OFFER.md
+          test -f docs/RELEASE_NOTES.md
+
+      - name: Check release metadata artifacts
+        run: |
+          set -euo pipefail
+          test -f dist/devworks-server-os.iso.sha256
+          test -f dist/devworks-server-os-autoinstall.iso.sha256
+          test -f dist/devworks-server-os-package-manifest.tsv
+          test -f dist/devworks-server-os-package-manifest.tsv.sha256
+          test -f dist/devworks-server-os-release-signing-key.asc
+
+      - name: Validate package manifest format
+        run: |
+          set -euo pipefail
+          head -n 1 dist/devworks-server-os-package-manifest.tsv | grep -Fx 'package	version	architecture'
+          test "$(wc -l < dist/devworks-server-os-package-manifest.tsv)" -gt 100
+

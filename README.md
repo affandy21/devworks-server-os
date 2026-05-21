@@ -1,6 +1,7 @@
 # Devworks Server OS
 
 [![Release](https://img.shields.io/github/v/release/affandy21/devworks-server-os?include_prereleases&label=release)](https://github.com/affandy21/devworks-server-os/releases)
+[![Validate](https://github.com/affandy21/devworks-server-os/actions/workflows/validate.yml/badge.svg)](https://github.com/affandy21/devworks-server-os/actions/workflows/validate.yml)
 [![Status](https://img.shields.io/badge/status-preview-blue)](docs/RELEASE_NOTES.md)
 [![Platform](https://img.shields.io/badge/platform-amd64%20Intel%2FAMD-lightgrey)](docs/DEVWORKS_SERVER_OS_MANUAL.md)
 [![License](https://img.shields.io/badge/license-proprietary-red)](LICENSE)
@@ -9,6 +10,14 @@
 Devworks Server OS adalah distribusi Linux kustom berbasis Debian Stable yang dirancang sebagai lingkungan pembelajaran dan pengembangan untuk penerapan server web, runtime AI lokal, serta monitoring sistem.
 
 Build saat ini telah mencakup ISO bootable, desktop GUI ringan, Devworks Control Center berbasis aplikasi native, serta installer permanen ke disk. Sistem ini cocok digunakan untuk pembelajaran server secara langsung, eksperimen lokal, dan pengembangan dalam lingkungan yang aman dan terkontrol.
+
+## Preview
+
+![Devworks Server OS desktop](docs/assets/screenshots/desktop.png)
+
+![Devworks Control Center](docs/assets/screenshots/control-center.png)
+
+![Devworks Applications menu](docs/assets/screenshots/applications-menu.png)
 
 ## Download
 
@@ -39,6 +48,9 @@ Dokumen pendukung:
 - [ISO Build Status](docs/ISO_BUILD_STATUS.md)
 - [Release Notes](docs/RELEASE_NOTES.md)
 - [Roadmap](docs/ROADMAP.md)
+- [Verify Release](docs/VERIFY_RELEASE.md)
+- [Third-Party Notices](docs/THIRD_PARTY_NOTICES.md)
+- [Source Code Offer](docs/SOURCE_CODE_OFFER.md)
   
 ## Status Saat Ini
 
