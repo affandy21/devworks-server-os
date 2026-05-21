@@ -17,8 +17,6 @@ Build saat ini telah mencakup ISO bootable, desktop GUI ringan, Devworks Control
 
 ![Devworks Control Center](docs/assets/screenshots/control-center.png)
 
-![Devworks Applications menu](docs/assets/screenshots/applications-menu.png)
-
 ## Download
 
 Release terbaru tersedia di halaman [GitHub Releases](https://github.com/affandy21/devworks-server-os/releases).
