@@ -126,19 +126,24 @@ Untuk workload AI:
 - Disk SSD.
 - GPU NVIDIA memerlukan instalasi driver dan runtime tambahan sesuai model GPU.
 
-## 6. Akun Default
+## 6. Akun Admin
 
-Akun default untuk build uji:
+Live ISO/lab build masih memakai user awal untuk masuk ke sesi live bila diperlukan:
 
 ```text
 Username: devworks
 Password: devworks
 ```
 
+Untuk instalasi permanen ke disk, installer sekarang bekerja seperti OS server umum:
+
+- Installer meminta username admin.
+- Installer meminta password admin baru dan konfirmasi password.
+- Installer dapat memasang SSH public key ke akun admin.
+- Profil production tidak menyimpan password default bersama.
+
 Rekomendasi setelah instalasi production:
 
-- Ganti password default.
-- Buat user admin personal.
 - Matikan autologin bila server dipasang di lokasi fisik yang tidak aman.
 - Nonaktifkan login SSH memakai password jika sudah memakai SSH key.
 

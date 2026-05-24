@@ -60,6 +60,7 @@ Dokumen pendukung:
 - Devworks Control Center berjalan sebagai aplikasi native.
 - Monitoring realtime tersedia untuk CPU, memori, disk, jaringan, dan service sistem.
 - Installer menggunakan konfirmasi disk manual untuk mengurangi risiko salah memilih disk.
+- Installer permanen meminta username/password admin dan dapat memasang SSH key seperti OS server umum.
 - Instalasi dual-boot otomatis belum didukung. Mode installer saat ini adalah `erase-disk`.
 - Profil `production-server` tersedia untuk hardening server: autologin off, SSH key-first, admin UI local-only, UFW ketat.
   

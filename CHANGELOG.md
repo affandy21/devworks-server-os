@@ -33,7 +33,9 @@ All notable changes to Devworks Server OS are documented here.
 ### Added
 
 - Production server installer profile.
-- First-login admin password expiration.
+- Interactive admin username/password setup for permanent installs.
+- Interactive or required SSH public key setup.
+- Optional first-login admin password expiration for hash-based installs.
 - SSH hardening controls.
 - Local-only admin web UI binding.
 - Kernel/network sysctl hardening.
@@ -43,4 +45,5 @@ All notable changes to Devworks Server OS are documented here.
 ### Changed
 
 - Bare-metal profile now defaults closer to production safety.
+- Production and bare-metal profiles no longer carry a shared default password hash.
 - Validation now checks production hardening files and disabled autologin.

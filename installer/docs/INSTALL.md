@@ -51,9 +51,12 @@ partitions.
 - `DEVWORKS_ALLOW_INSTALL_ON_MOUNTED_DISK`: default `no`; keep it disabled for safety.
 - `TARGET_BOOT_MODE`: `auto`, `efi`, or `bios`.
 - `ADMIN_USER`: administrator account.
-- `ADMIN_PASSWORD_HASH`: SHA-512 password hash from `openssl passwd -6`.
+- `ADMIN_PASSWORD_MODE`: `prompt`, `hash`, or `locked`.
+- `ADMIN_PASSWORD_HASH`: SHA-512 password hash from `openssl passwd -6`; only used with `ADMIN_PASSWORD_MODE=hash`.
 - `ENABLE_AUTOLOGIN`: GUI autologin for lab/preview systems.
 - `SSH_PASSWORD_AUTH`: temporary password login for setup.
+- `SSH_KEY_SETUP_MODE`: `prompt`, `required`, or `skip`.
+- `SSH_AUTHORIZED_KEYS_FILE`: SSH public keys copied into the admin account.
 - `ENABLE_UFW`: firewall activation.
 - `TLS_MODE`: `self-signed`, `existing`, `certbot`, or `off`.
 - `ENABLE_WEB_STACK`: enables nginx and web target service.
@@ -66,8 +69,10 @@ partitions.
 Before installing on a real server:
 
 ```bash
+ADMIN_PASSWORD_MODE="prompt"
 ENABLE_AUTOLOGIN="no"
 SSH_PASSWORD_AUTH="no"
+SSH_KEY_SETUP_MODE="required"
 TLS_MODE="existing"
 ENABLE_AUTO_REBOOT_AFTER_SECURITY_UPDATE="no"
 ```
@@ -77,3 +82,7 @@ Deploy SSH keys through:
 ```bash
 SSH_AUTHORIZED_KEYS_FILE="/root/authorized_keys"
 ```
+
+For manual installs, the recommended path is to let the installer prompt for
+the admin username, full name, password, and SSH public key path. Do not keep a
+shared default password in production profiles.

@@ -42,6 +42,81 @@ is_yes() {
   esac
 }
 
+is_interactive() {
+  [[ "${INSTALLER_INTERACTIVE:-auto}" != "no" && -r /dev/tty && -w /dev/tty ]]
+}
+
+prompt_with_default() {
+  local prompt="$1"
+  local default="$2"
+  local answer=""
+  is_interactive || die "Interactive prompt requested without a controlling terminal."
+  if [[ -n "${default}" ]]; then
+    printf '%s [%s]: ' "${prompt}" "${default}" > /dev/tty
+    read -r answer < /dev/tty
+    printf '%s' "${answer:-${default}}"
+  else
+    printf '%s: ' "${prompt}" > /dev/tty
+    read -r answer < /dev/tty
+    printf '%s' "${answer}"
+  fi
+}
+
+prompt_yes_no() {
+  local prompt="$1"
+  local default="${2:-no}"
+  local answer=""
+  local suffix="[y/N]"
+  [[ "${default}" == "yes" ]] && suffix="[Y/n]"
+  is_interactive || die "Interactive prompt requested without a controlling terminal."
+  while true; do
+    printf '%s %s: ' "${prompt}" "${suffix}" > /dev/tty
+    read -r answer < /dev/tty
+    answer="${answer:-${default}}"
+    case "${answer}" in
+      y|Y|yes|YES) return 0 ;;
+      n|N|no|NO) return 1 ;;
+      *) log_warn "Please answer yes or no." ;;
+    esac
+  done
+}
+
+prompt_secret_confirm() {
+  local prompt="$1"
+  local first=""
+  local second=""
+  is_interactive || die "Interactive prompt requested without a controlling terminal."
+  while true; do
+    printf '%s: ' "${prompt}" > /dev/tty
+    read -r -s first < /dev/tty
+    printf '\n' > /dev/tty
+    printf 'Confirm %s: ' "${prompt}" > /dev/tty
+    read -r -s second < /dev/tty
+    printf '\n' > /dev/tty
+    if [[ -z "${first}" ]]; then
+      log_warn "Password cannot be empty."
+      continue
+    fi
+    if [[ "${first}" != "${second}" ]]; then
+      log_warn "Passwords do not match."
+      continue
+    fi
+    printf '%s' "${first}"
+    return 0
+  done
+}
+
+validate_linux_username() {
+  local username="$1"
+  [[ "${username}" =~ ^[a-z_][a-z0-9_-]{0,31}$ ]]
+}
+
+hash_password_sha512() {
+  local password="$1"
+  require_cmd openssl
+  printf '%s' "${password}" | openssl passwd -6 -stdin
+}
+
 stage_enabled() {
   local stage="$1"
   if [[ -n "${STAGE_FROM:-}" && "${stage}" < "${STAGE_FROM}" ]]; then

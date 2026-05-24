@@ -73,7 +73,9 @@ Release ini menambahkan hardening untuk server kosong yang akan dipakai lebih se
 ### Added
 
 - Profil installer `installer/profiles/production-server.env`.
-- Expire admin password on first login.
+- Installer-style admin username/password prompt for permanent installs.
+- SSH public key prompt/required modes.
+- Optional first-login password expiration for hash-based installs.
 - SSH empty password hardening.
 - Reduced SSH max authentication tries.
 - Admin web UI local-only binding via `ADMIN_WEB_UI_BIND=127.0.0.1`.
@@ -83,7 +85,8 @@ Release ini menambahkan hardening untuk server kosong yang akan dipakai lebih se
 
 ### Changed
 
-- Bare-metal profile now forces first-login password change.
+- Bare-metal profile now asks for the real admin password during install.
+- Bare-metal and production profiles now use prompted credentials instead of a shared default hash.
 - Bare-metal admin web UI now binds to localhost by default.
 - README documents the production hardening profile.
 
@@ -98,7 +101,7 @@ C:\root\backups\devworks-server-backup-20260524-040912.tar.gz.sha256
 
 ### Remaining Production Requirements
 
-- Replace default password hash before real deployment.
+- Use prompted credentials or provide a unique hash for automated deployment.
 - Provide SSH authorized keys before disabling SSH password login.
 - Provide real TLS certificate files or switch to certbot after DNS is ready.
 - Validate restore of each web/AI project from backup.

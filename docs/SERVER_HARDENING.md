@@ -15,7 +15,7 @@ It is more secure than the preview profile, but every production deployment must
 - SSH password authentication disabled in production profile.
 - SSH empty passwords disabled.
 - SSH max authentication tries reduced.
-- Admin password expires on first login.
+- Admin username/password can be collected interactively during installation.
 - Admin web UI binds to `127.0.0.1` by default.
 - UFW allows only SSH, HTTP, and HTTPS by default.
 - Admin UI port `8088` is not opened by UFW.
@@ -35,7 +35,7 @@ Before running, review:
 
 ```text
 TARGET_DISK
-ADMIN_PASSWORD_HASH
+ADMIN_PASSWORD_MODE
 SSH_AUTHORIZED_KEYS_FILE
 TLS_DOMAIN
 TLS_CERT_SOURCE
@@ -58,17 +58,23 @@ The production profile requires `/root/devworks-authorized_keys`. This avoids cr
 
 ## First Login
 
-The admin password is expired intentionally. On first login, set a new strong password.
+The production profile uses `ADMIN_PASSWORD_MODE=prompt`, so the installer asks
+for the real admin password during installation. There is no shared production
+password baked into the profile.
 
-Default preview hash is still present as a placeholder and must be replaced before real production use.
+For fully automated installs, generate a new password hash:
 
-Generate a new password hash:
 
 ```bash
 openssl passwd -6
 ```
 
-Then replace `ADMIN_PASSWORD_HASH` in the selected installer profile.
+Then set:
+
+```bash
+ADMIN_PASSWORD_MODE="hash"
+ADMIN_PASSWORD_HASH="..."
+```
 
 ## Post-Install Validation
 
