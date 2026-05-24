@@ -27,6 +27,8 @@ the canonical name, while `dw` is the short administrator command.
 ```bash
 sudo dw status
 sudo dw templates
+sudo dw audit --save
+sudo dw qa --save
 ```
 
 Enable a public web/TLS stack only after DNS points to the server:
@@ -61,6 +63,20 @@ Enable Docker only when a daemon-based container runtime is required:
 sudo dw enable container docker
 ```
 
+Create and verify an on-server backup after application files are restored:
+
+```bash
+sudo dw backup create --source /srv/devworks --dest /var/backups/devworks
+sudo dw backup restore --archive /var/backups/devworks/devworks-backup-YYYYMMDD-HHMMSS.tar.gz --target /srv/restore-test
+```
+
+Schedule a daily backup only after the restore path has been tested:
+
+```bash
+sudo dw backup schedule --source /srv/devworks --dest /var/backups/devworks --calendar "*-*-* 02:30:00"
+systemctl list-timers devworks-backup.timer
+```
+
 ## Public Server Checklist
 
 Before publishing a server to the internet:
@@ -70,8 +86,10 @@ Before publishing a server to the internet:
 - Confirm `sudo ufw status verbose` opens only required ports.
 - Confirm `systemctl --failed` is empty.
 - Confirm `sudo dw status` matches the intended workload profile.
+- Run `sudo dw audit --save` and review every WARN/FAIL.
+- Run `sudo dw qa --save` after each reboot test.
 - Issue TLS certificates after DNS is correct.
-- Configure off-server backup and test restore.
+- Configure on-server and off-server backup, then test restore.
 - Apply resource limits to AI and heavy background jobs.
 - Reboot and repeat validation.
 

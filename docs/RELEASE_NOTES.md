@@ -12,10 +12,10 @@ Release preview ini menyiapkan Devworks Server OS sebagai ISO bootable berbasis 
 
 ```text
 dist/devworks-server-os.iso
-SHA256: a5e5c8d4b9d51ccccc9296027b93ac9e4bb207ab6c5aca718ccb0c65dcbe5d79
+dist/devworks-server-os.iso.sha256
 
 dist/devworks-server-os-autoinstall.iso
-SHA256: d31a48c842c81ca9f313e4d4a06d0e02081db24554cea915776678175addb921
+dist/devworks-server-os-autoinstall.iso.sha256
 ```
 
 Release ini juga menyertakan:
@@ -133,3 +133,29 @@ sudo dw status
 sudo dw enable web --domain example.com --tls certbot --email admin@example.com --open-firewall
 sudo dw enable ai --runtime ollama --bind 127.0.0.1 --memory-max 8G --cpu-quota 300%
 ```
+
+## v0.2.0-server-qa
+
+Release line ini menambahkan prosedur operasional agar Devworks Server OS lebih siap dipakai sebagai server publik yang dikendalikan administrator.
+
+### Added
+
+- `sudo dw audit --save` untuk audit SSH, UFW, failed units, public listener, TLS certificate, dan policy service opt-in.
+- `sudo dw qa --save` untuk smoke test release candidate setelah install dan reboot.
+- `sudo dw backup create` untuk membuat arsip backup dengan checksum.
+- `sudo dw backup restore` untuk restore arsip ke target uji atau target produksi.
+- `sudo dw backup schedule` dan `sudo dw backup unschedule` untuk timer backup systemd.
+- `docs/QA_RELEASE_CHECKLIST.md` sebagai checklist build, install, reboot, backup, dan release.
+- Ringkasan disk installer sebelum tindakan erase.
+- Deteksi signature OS/filesystem lama sebelum disk dihapus.
+
+### Changed
+
+- Installer standar memberi konteks disk yang lebih jelas sebelum user mengetik konfirmasi manual.
+- Prosedur production readiness sekarang memasukkan audit, QA, backup, dan restore test.
+
+### Operational Notes
+
+- Web, AI, dan container daemon tetap tidak auto-start pada instalasi awal.
+- Backup lokal membantu rollback cepat, tetapi server publik tetap membutuhkan backup off-server.
+- `dw audit` bisa menghasilkan WARN untuk service yang memang sengaja dibuka ke publik; administrator harus mencocokkan hasil audit dengan desain deployment.

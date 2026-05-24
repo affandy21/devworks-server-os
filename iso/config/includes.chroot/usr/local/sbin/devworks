@@ -10,6 +10,10 @@ WEB_HEALTH_TIMER="/etc/systemd/system/devworks-web-health.timer"
 AI_SERVICE="/etc/systemd/system/devworks-ai.service"
 TEMPLATE_DIR="/etc/devworks/templates"
 TLS_DIR="/etc/devworks/tls"
+LOG_DIR="/var/log/devworks"
+BACKUP_CONF="/etc/devworks/backup.conf"
+BACKUP_SERVICE="/etc/systemd/system/devworks-backup.service"
+BACKUP_TIMER="/etc/systemd/system/devworks-backup.timer"
 
 usage() {
   cat <<'EOF'
@@ -24,6 +28,12 @@ Usage:
   dw disable ai [--close-firewall]
   dw enable container podman|docker
   dw disable container docker
+  dw audit [--save]
+  dw qa [--save]
+  dw backup create [--source PATH] [--dest DIR] [--name NAME]
+  dw backup restore --archive FILE [--target DIR] [--owner USER:GROUP]
+  dw backup schedule [--source PATH] [--dest DIR] [--calendar SPEC]
+  dw backup unschedule
 
 Long form:
   devworks status
@@ -35,6 +45,9 @@ Long form:
   devworks disable ai [--close-firewall]
   devworks enable container podman|docker
   devworks disable container docker
+  devworks audit [--save]
+  devworks qa [--save]
+  devworks backup create|restore|schedule|unschedule
 
 Defaults are conservative:
   - web, AI, and container daemons are not enabled automatically
@@ -51,6 +64,8 @@ require_root() {
 }
 
 have() { command -v "$1" >/dev/null 2>&1; }
+
+timestamp() { date +%Y%m%d-%H%M%S; }
 
 can_start_units() {
   [[ -d /run/systemd/system ]] && ! systemd-detect-virt --quiet --chroot 2>/dev/null
@@ -102,6 +117,321 @@ firewall_delete_allow() {
   if have ufw; then
     ufw delete allow "${port}/tcp" || true
   fi
+}
+
+audit_pass=0
+audit_warn=0
+audit_fail=0
+
+audit_emit() {
+  local level="$1"
+  local name="$2"
+  local detail="${3:-}"
+  case "${level}" in
+    PASS) audit_pass=$((audit_pass + 1)) ;;
+    WARN) audit_warn=$((audit_warn + 1)) ;;
+    FAIL) audit_fail=$((audit_fail + 1)) ;;
+  esac
+  if [[ -n "${detail}" ]]; then
+    printf '[%s] %s - %s\n' "${level}" "${name}" "${detail}"
+  else
+    printf '[%s] %s\n' "${level}" "${name}"
+  fi
+}
+
+audit_check() {
+  local name="$1"
+  local fail_detail="$2"
+  shift 2
+  if "$@" >/tmp/devworks-audit.out 2>/tmp/devworks-audit.err; then
+    audit_emit PASS "${name}"
+  else
+    local err
+    err="$(tr '\n' ' ' </tmp/devworks-audit.err | sed 's/[[:space:]]\+/ /g' | cut -c1-180)"
+    audit_emit FAIL "${name}" "${fail_detail}${err:+ (${err})}"
+  fi
+}
+
+service_enabled() {
+  systemctl is-enabled "$1" >/dev/null 2>&1
+}
+
+service_active() {
+  systemctl is-active --quiet "$1"
+}
+
+port_listening_all() {
+  local port="$1"
+  ss -tln | awk -v p=":${port}" '$4 ~ p "$" && ($4 ~ /(^|:)0\.0\.0\.0:/ || $4 ~ /^\[::\]:/ || $4 ~ /^\*:/) {found=1} END {exit !found}'
+}
+
+run_audit() {
+  audit_pass=0
+  audit_warn=0
+  audit_fail=0
+
+  local save="no"
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --save) save="yes"; shift ;;
+      *) echo "Unknown audit option: $1" >&2; exit 2 ;;
+    esac
+  done
+
+  local report=""
+  if [[ "${save}" == "yes" ]]; then
+    require_root "$@"
+    install -d -m 0755 "${LOG_DIR}"
+    report="${LOG_DIR}/audit-$(timestamp).txt"
+    exec > >(tee "${report}") 2>&1
+  fi
+
+  echo "Devworks Server OS security audit"
+  echo "Time: $(date -Is)"
+  echo "Host: $(hostname)"
+  echo
+
+  audit_check "systemd reachable" "systemctl is not responding" systemctl list-units --no-pager
+  audit_check "no failed systemd units" "failed units exist" bash -c 'test "$(systemctl --failed --no-legend | wc -l)" -eq 0'
+  audit_check "SSH config syntax" "sshd config is invalid" sshd -t
+  audit_check "SSH service active" "ssh service is not active" systemctl is-active --quiet ssh
+  audit_check "root SSH login disabled" "PermitRootLogin no is missing" bash -c 'grep -RqsE "^[[:space:]]*PermitRootLogin[[:space:]]+no" /etc/ssh/sshd_config /etc/ssh/sshd_config.d 2>/dev/null'
+
+  if grep -RqsE '^[[:space:]]*PasswordAuthentication[[:space:]]+no' /etc/ssh/sshd_config /etc/ssh/sshd_config.d 2>/dev/null; then
+    audit_emit PASS "SSH password authentication disabled"
+  else
+    audit_emit WARN "SSH password authentication" "password login appears enabled; use keys for public servers"
+  fi
+
+  if have ufw; then
+    if ufw status | grep -q "Status: active"; then
+      audit_emit PASS "UFW active"
+    else
+      audit_emit FAIL "UFW active" "firewall is not active"
+    fi
+    if ufw status verbose | grep -q "Default: deny (incoming), allow (outgoing)"; then
+      audit_emit PASS "UFW default policy"
+    else
+      audit_emit WARN "UFW default policy" "expected deny incoming and allow outgoing"
+    fi
+  else
+    audit_emit FAIL "UFW installed" "ufw command not found"
+  fi
+
+  service_active fail2ban && audit_emit PASS "Fail2ban active" || audit_emit WARN "Fail2ban active" "not active"
+  service_enabled unattended-upgrades && audit_emit PASS "Unattended upgrades enabled" || audit_emit WARN "Unattended upgrades enabled" "not enabled"
+
+  if service_enabled nginx; then
+    audit_emit WARN "Nginx enabled" "web is enabled; confirm this is intentional"
+  else
+    audit_emit PASS "Nginx disabled by default"
+  fi
+
+  if service_enabled devworks-ai.service; then
+    audit_emit WARN "AI runtime enabled" "confirm resource limits and bind address"
+  else
+    audit_emit PASS "AI runtime disabled by default"
+  fi
+
+  if service_enabled docker; then
+    audit_emit WARN "Docker daemon enabled" "confirm daemon exposure and container policy"
+  else
+    audit_emit PASS "Docker daemon disabled by default"
+  fi
+
+  for port in 80 443 8088 11434; do
+    if port_listening_all "${port}"; then
+      audit_emit WARN "Public listener ${port}/tcp" "service listens on all interfaces"
+    else
+      audit_emit PASS "No public listener ${port}/tcp"
+    fi
+  done
+
+  if find /etc/ssh /etc/sudoers.d -xdev -type f -perm -002 2>/dev/null | grep -q .; then
+    audit_emit FAIL "Sensitive file permissions" "world-writable file found under /etc/ssh or /etc/sudoers.d"
+  else
+    audit_emit PASS "Sensitive file permissions"
+  fi
+
+  local root_pct
+  root_pct="$(df -P / | awk 'NR==2 {gsub(/%/,"",$5); print $5}')"
+  if [[ "${root_pct:-0}" -lt 90 ]]; then
+    audit_emit PASS "Root disk usage" "${root_pct}% used"
+  else
+    audit_emit WARN "Root disk usage" "${root_pct}% used"
+  fi
+
+  local cert
+  while IFS= read -r cert; do
+    if openssl x509 -checkend 1209600 -noout -in "${cert}" >/dev/null 2>&1; then
+      audit_emit PASS "TLS certificate ${cert}" "valid for at least 14 days"
+    else
+      audit_emit WARN "TLS certificate ${cert}" "expires within 14 days or is invalid"
+    fi
+  done < <(find /etc/letsencrypt/live /etc/devworks/tls \( -name fullchain.pem -o -name '*.crt' \) 2>/dev/null || true)
+
+  echo
+  echo "Summary: PASS=${audit_pass} WARN=${audit_warn} FAIL=${audit_fail}"
+  rm -f /tmp/devworks-audit.out /tmp/devworks-audit.err
+  [[ -n "${report}" ]] && echo "Saved report: ${report}"
+  [[ "${audit_fail}" -eq 0 ]]
+}
+
+run_qa() {
+  local save="no"
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --save) save="yes"; shift ;;
+      *) echo "Unknown qa option: $1" >&2; exit 2 ;;
+    esac
+  done
+
+  local report=""
+  if [[ "${save}" == "yes" ]]; then
+    require_root "$@"
+    install -d -m 0755 "${LOG_DIR}"
+    report="${LOG_DIR}/qa-$(timestamp).txt"
+    exec > >(tee "${report}") 2>&1
+  fi
+
+  echo "Devworks Server OS release candidate QA"
+  echo "Time: $(date -Is)"
+  echo
+  run_audit || true
+  echo
+  echo "Feature manager help:"
+  "$0" help | sed -n '1,18p'
+  echo
+  echo "Boot/install reminders:"
+  echo "- Install only to a verified empty target disk."
+  echo "- Reboot at least 3 times and rerun: sudo dw qa --save"
+  echo "- Enable web/TLS only after DNS and firewall policy are ready."
+  [[ -n "${report}" ]] && echo "Saved report: ${report}"
+}
+
+backup_create() {
+  require_root "$@"
+  local source="/srv/devworks"
+  local dest="/var/backups/devworks"
+  local name="devworks-backup-$(timestamp)"
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --source) source="$2"; shift 2 ;;
+      --dest) dest="$2"; shift 2 ;;
+      --name) name="$2"; shift 2 ;;
+      *) echo "Unknown backup create option: $1" >&2; exit 2 ;;
+    esac
+  done
+
+  [[ -e "${source}" ]] || { echo "Backup source not found: ${source}" >&2; exit 1; }
+  install -d -m 0750 "${dest}"
+  local archive="${dest}/${name}.tar.gz"
+  local parent base
+  parent="$(dirname "${source}")"
+  base="$(basename "${source}")"
+  tar --acls --xattrs -czf "${archive}" -C "${parent}" "${base}"
+  sha256sum "${archive}" > "${archive}.sha256"
+  chmod 0640 "${archive}" "${archive}.sha256"
+  echo "Backup created: ${archive}"
+  echo "Checksum: ${archive}.sha256"
+}
+
+backup_restore() {
+  require_root "$@"
+  local archive=""
+  local target="/srv/restored-devworks"
+  local owner=""
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --archive) archive="$2"; shift 2 ;;
+      --target) target="$2"; shift 2 ;;
+      --owner) owner="$2"; shift 2 ;;
+      *) echo "Unknown backup restore option: $1" >&2; exit 2 ;;
+    esac
+  done
+
+  [[ -n "${archive}" ]] || { echo "Missing --archive FILE" >&2; exit 2; }
+  [[ -f "${archive}" ]] || { echo "Archive not found: ${archive}" >&2; exit 1; }
+  if [[ -f "${archive}.sha256" ]]; then
+    (cd "$(dirname "${archive}")" && sha256sum -c "$(basename "${archive}").sha256")
+  fi
+  install -d -m 0755 "${target}"
+  tar --acls --xattrs -xzf "${archive}" -C "${target}"
+  if [[ -n "${owner}" ]]; then
+    chown -R "${owner}" "${target}"
+  fi
+  echo "Backup restored into: ${target}"
+}
+
+backup_schedule() {
+  require_root "$@"
+  local source="/srv/devworks"
+  local dest="/var/backups/devworks"
+  local calendar="*-*-* 02:30:00"
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --source) source="$2"; shift 2 ;;
+      --dest) dest="$2"; shift 2 ;;
+      --calendar) calendar="$2"; shift 2 ;;
+      *) echo "Unknown backup schedule option: $1" >&2; exit 2 ;;
+    esac
+  done
+
+  install -d -m 0755 /etc/devworks
+  cat > "${BACKUP_CONF}" <<EOF
+DEVWORKS_BACKUP_SOURCE="${source}"
+DEVWORKS_BACKUP_DEST="${dest}"
+EOF
+  chmod 0640 "${BACKUP_CONF}"
+
+  cat > "${BACKUP_SERVICE}" <<'EOF'
+[Unit]
+Description=Devworks scheduled backup
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/devworks/backup.conf
+ExecStart=/usr/local/sbin/dw backup create --source ${DEVWORKS_BACKUP_SOURCE} --dest ${DEVWORKS_BACKUP_DEST}
+EOF
+
+  cat > "${BACKUP_TIMER}" <<EOF
+[Unit]
+Description=Run Devworks scheduled backup
+
+[Timer]
+OnCalendar=${calendar}
+Persistent=true
+Unit=devworks-backup.service
+
+[Install]
+WantedBy=timers.target
+EOF
+  systemctl daemon-reload
+  enable_unit devworks-backup.timer
+  echo "Backup schedule enabled: ${calendar}"
+}
+
+backup_unschedule() {
+  require_root "$@"
+  disable_unit devworks-backup.timer
+  rm -f "${BACKUP_SERVICE}" "${BACKUP_TIMER}"
+  systemctl daemon-reload
+  echo "Backup schedule disabled."
+}
+
+backup_cmd() {
+  local action="${1:-}"
+  shift || true
+  case "${action}" in
+    create) backup_create "$@" ;;
+    restore) backup_restore "$@" ;;
+    schedule) backup_schedule "$@" ;;
+    unschedule) backup_unschedule "$@" ;;
+    *) echo "Usage: dw backup create|restore|schedule|unschedule" >&2; exit 2 ;;
+  esac
 }
 
 write_templates() {
@@ -186,6 +516,15 @@ Unit=devworks-backup.service
 
 [Install]
 WantedBy=timers.target
+EOF
+
+  cat > "${TEMPLATE_DIR}/backup/devworks-backup.service.example" <<'EOF'
+[Unit]
+Description=Example Devworks backup job
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/dw backup create --source /srv/devworks --dest /var/backups/devworks
 EOF
 }
 
@@ -501,6 +840,9 @@ status() {
 
 case "${1:-}" in
   status) status ;;
+  audit) shift; run_audit "$@" ;;
+  qa) shift; run_qa "$@" ;;
+  backup) shift; backup_cmd "$@" ;;
   templates) write_templates; find "${TEMPLATE_DIR}" -type f | sort ;;
   install-packages)
     case "${2:-}" in

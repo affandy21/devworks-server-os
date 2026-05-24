@@ -33,6 +33,18 @@ scp C:\root\backups\devworks-server-backup-20260524-040912.tar.gz.sha256 devwork
 
 ## Restore on Devworks Server OS
 
+Preferred restore helper:
+
+```bash
+cd /home/devworks
+sudo dw backup restore \
+  --archive devworks-server-backup-20260524-040912.tar.gz \
+  --target /srv/imported \
+  --owner devworks:devworks
+```
+
+Manual restore equivalent:
+
 ```bash
 cd /home/devworks
 sha256sum -c devworks-server-backup-20260524-040912.tar.gz.sha256
@@ -45,6 +57,31 @@ The restored tree will be:
 
 ```text
 /srv/imported/server
+```
+
+## Create Backups on Devworks Server OS
+
+Use `dw backup` for local snapshots before changes, upgrades, or migrations:
+
+```bash
+sudo dw backup create --source /srv/devworks --dest /var/backups/devworks
+```
+
+Schedule daily backups after a manual restore test succeeds:
+
+```bash
+sudo dw backup schedule \
+  --source /srv/devworks \
+  --dest /var/backups/devworks \
+  --calendar "*-*-* 02:30:00"
+
+systemctl list-timers devworks-backup.timer
+```
+
+Disable the schedule:
+
+```bash
+sudo dw backup unschedule
 ```
 
 Expected top-level directories:
@@ -90,4 +127,3 @@ docker compose up -d
 ## Important
 
 Do not blindly run old scripts as root on the new server. Review `.env`, database credentials, TLS paths, service ports, and firewall requirements first.
-

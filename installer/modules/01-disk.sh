@@ -44,11 +44,63 @@ confirm_destructive_disk_action() {
   local expected="ERASE ${TARGET_DISK}"
   print_disk_inventory
   echo
+  print_install_summary
   log_warn "This will permanently erase all partitions and data on ${TARGET_DISK}."
   log_warn "This mode is not dualboot-safe."
   echo "To continue, type exactly: ${expected}"
   read -r -p "> " confirmation
   [[ "${confirmation}" == "${expected}" ]] || die "Disk confirmation did not match. Aborting."
+}
+
+detect_existing_operating_systems() {
+  local disk="$1"
+  local found="no"
+  if lsblk -nr -o FSTYPE,PARTLABEL,LABEL,MOUNTPOINTS "${disk}" | grep -Eiq 'ntfs|BitLocker|EFI|ESP|Microsoft|Windows|linux|ext4|btrfs|xfs|crypto_LUKS|LVM'; then
+    found="yes"
+  fi
+  if blkid | grep -F "${disk}" | grep -Eiq 'TYPE="(ntfs|vfat|ext4|btrfs|xfs|crypto_LUKS|LVM2_member)"'; then
+    found="yes"
+  fi
+  [[ "${found}" == "yes" ]]
+}
+
+print_install_summary() {
+  local disk_size disk_model boot_mode existing_os
+  disk_size="$(lsblk -dpno SIZE "${TARGET_DISK}" | head -n1 | xargs || true)"
+  disk_model="$(lsblk -dpno MODEL,SERIAL "${TARGET_DISK}" | head -n1 | sed 's/[[:space:]]\+/ /g' | xargs || true)"
+  boot_mode="${TARGET_BOOT_MODE:-auto}"
+  if [[ "${boot_mode}" == "auto" ]]; then
+    if [[ -d /sys/firmware/efi ]]; then
+      boot_mode="efi"
+    else
+      boot_mode="bios"
+    fi
+  fi
+  existing_os="no obvious existing OS signature detected"
+  if detect_existing_operating_systems "${TARGET_DISK}"; then
+    existing_os="possible existing OS/data partitions detected"
+  fi
+
+  cat <<EOF
+Install summary
+---------------
+Mode:        ${INSTALL_MODE}
+Target disk: ${TARGET_DISK}
+Disk size:   ${disk_size:-unknown}
+Disk model:  ${disk_model:-unknown}
+Boot mode:   ${boot_mode}
+EFI size:    ${TARGET_EFI_SIZE_MIB} MiB
+Swap size:   ${TARGET_SWAP_SIZE_MIB} MiB
+Root FS:     ${TARGET_ROOT_FS:-ext4}
+Detection:   ${existing_os}
+
+Partition plan:
+  1. EFI System Partition (${TARGET_EFI_SIZE_MIB} MiB)
+  2. BIOS boot partition when BIOS mode is selected
+  3. Swap partition when TARGET_SWAP_SIZE_MIB > 0
+  4. Root filesystem using remaining space
+
+EOF
 }
 
 if [[ "${INSTALL_MODE}" != "erase-disk" ]]; then
@@ -66,6 +118,11 @@ fi
 log_info "Preparing disk ${TARGET_DISK}"
 
 [[ -b "${TARGET_DISK}" ]] || die "Target disk is not a block device: ${TARGET_DISK}"
+
+if detect_existing_operating_systems "${TARGET_DISK}"; then
+  log_warn "Existing filesystem/OS signatures were detected on ${TARGET_DISK}."
+  log_warn "Continue only if this is the intended empty or disposable target disk."
+fi
 
 if lsblk -nr -o MOUNTPOINTS "${TARGET_DISK}" | grep -q '[^[:space:]]' && ! is_yes "${DEVWORKS_ALLOW_INSTALL_ON_MOUNTED_DISK}"; then
   lsblk -o NAME,SIZE,TYPE,FSTYPE,MOUNTPOINTS "${TARGET_DISK}" || true

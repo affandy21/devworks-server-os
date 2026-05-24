@@ -12,11 +12,8 @@ dist/devworks-server-os-autoinstall.iso
 ## Checksum
 
 ```text
-devworks-server-os.iso
-SHA256: a5e5c8d4b9d51ccccc9296027b93ac9e4bb207ab6c5aca718ccb0c65dcbe5d79
-
-devworks-server-os-autoinstall.iso
-SHA256: d31a48c842c81ca9f313e4d4a06d0e02081db24554cea915776678175addb921
+dist/devworks-server-os.iso.sha256
+dist/devworks-server-os-autoinstall.iso.sha256
 ```
 
 ## Perubahan Dari Fase Awal
@@ -53,4 +50,3 @@ Untuk setiap release baru:
 7. Restart VM minimal 3 kali.
 8. Cek `systemctl --failed`.
 9. Cek SSH, HTTP/TLS, UFW, dan Fail2ban.
-

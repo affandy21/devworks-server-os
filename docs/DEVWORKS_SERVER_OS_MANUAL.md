@@ -46,14 +46,11 @@ dist/devworks-server-os.iso
 dist/devworks-server-os-autoinstall.iso
 ```
 
-Checksum build terakhir:
+Checksum build terakhir tersedia di file `.sha256`:
 
 ```text
-devworks-server-os.iso
-SHA256: a5e5c8d4b9d51ccccc9296027b93ac9e4bb207ab6c5aca718ccb0c65dcbe5d79
-
-devworks-server-os-autoinstall.iso
-SHA256: d31a48c842c81ca9f313e4d4a06d0e02081db24554cea915776678175addb921
+dist/devworks-server-os.iso.sha256
+dist/devworks-server-os-autoinstall.iso.sha256
 ```
 
 Release tambahan:
@@ -278,9 +275,12 @@ Devworks Server OS tidak menjalankan workload publik secara otomatis. Gunakan:
 ```bash
 sudo dw status
 sudo dw templates
+sudo dw audit --save
+sudo dw qa --save
 sudo dw enable web --domain example.com --tls certbot --email admin@example.com --open-firewall
 sudo dw enable ai --runtime ollama --bind 127.0.0.1 --memory-max 8G --cpu-quota 300%
 sudo dw enable container podman
+sudo dw backup create --source /srv/devworks --dest /var/backups/devworks
 ```
 
 Contoh Docker service policy:
@@ -430,6 +430,8 @@ sudo ufw status verbose
 sudo systemctl status ssh --no-pager
 sudo systemctl status fail2ban --no-pager
 sudo dw status
+sudo dw audit --save
+sudo dw qa --save
 ```
 
 Uji akses SSH:
@@ -471,9 +473,38 @@ Command validasi di guest:
 systemctl --failed
 systemctl is-active ssh ufw fail2ban
 sudo dw status
+sudo dw qa --save
 ```
 
-## 20. Prosedur Uji Disk Kosong
+## 20. Backup dan Restore
+
+Backup lokal tersedia melalui `dw backup`. Gunakan ini sebelum upgrade, migrasi, atau perubahan konfigurasi besar.
+
+Buat backup:
+
+```bash
+sudo dw backup create --source /srv/devworks --dest /var/backups/devworks
+```
+
+Uji restore:
+
+```bash
+sudo dw backup restore \
+  --archive /var/backups/devworks/devworks-backup-YYYYMMDD-HHMMSS.tar.gz \
+  --target /srv/restore-test \
+  --owner devworks:devworks
+```
+
+Jadwalkan backup harian setelah restore test berhasil:
+
+```bash
+sudo dw backup schedule --source /srv/devworks --dest /var/backups/devworks --calendar "*-*-* 02:30:00"
+systemctl list-timers devworks-backup.timer
+```
+
+Backup lokal tidak menggantikan backup off-server. Untuk server publik, salin backup ke storage terpisah dan uji restore secara berkala.
+
+## 21. Prosedur Uji Disk Kosong
 
 Target uji:
 
@@ -493,7 +524,7 @@ Langkah:
 8. Boot ulang dari disk.
 9. Jalankan checklist validasi.
 
-## 21. Instalasi Ke PC atau Server Intel
+## 22. Instalasi Ke PC atau Server Intel
 
 Bisa dipasang ke PC/laptop/server Intel 64-bit selama hardware didukung kernel Debian.
 
@@ -511,7 +542,7 @@ Rekomendasi untuk server kosong:
 - Cabut disk berisi data penting agar tidak salah pilih.
 - Setelah instalasi stabil, baru tambahkan disk data tambahan.
 
-## 22. Batasan Saat Ini
+## 23. Batasan Saat Ini
 
 Batasan yang masih perlu dicatat:
 
@@ -519,9 +550,9 @@ Batasan yang masih perlu dicatat:
 - Installer saat ini fokus pada erase-disk.
 - Driver GPU AI production belum dibuat universal untuk semua model GPU.
 - Belum ada sistem update OS versi resmi seperti repository sendiri.
-- Hardening production perlu disesuaikan lagi dengan domain, IP publik, TLS, backup, dan model deployment web/AI.
+- Hardening production perlu divalidasi ulang dengan domain, IP publik, TLS, backup off-server, dan model deployment web/AI.
 
-## 23. Roadmap
+## 24. Roadmap
 
 Roadmap yang disarankan:
 
@@ -529,12 +560,12 @@ Roadmap yang disarankan:
 2. Wizard setup awal untuk user, password, hostname, timezone, dan network.
 3. Devworks repository internal untuk update paket OS.
 4. Snapshot dan rollback otomatis.
-5. Backup scheduler.
+5. Repository update internal.
 6. Native service manager untuk Web dan AI.
-7. Health check SSH, TLS, firewall, disk, dan runtime AI.
+7. Health check SSH, TLS, firewall, disk, dan runtime AI yang terjadwal.
 8. Build release dengan nomor versi dan changelog.
 
-## 24. Identitas Build
+## 25. Identitas Build
 
 Nama produk:
 
@@ -560,7 +591,7 @@ Status:
 Preview stabil untuk VirtualBox dan server kosong berbasis Intel/AMD 64-bit.
 ```
 
-## 25. Upstream dan Source Code
+## 26. Upstream dan Source Code
 
 Devworks Server OS memakai komponen upstream seperti Debian, Linux kernel, GNU utilities, systemd, XFCE, LightDM, OpenSSH, Nginx, UFW, dan Fail2ban.
 

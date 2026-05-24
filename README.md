@@ -49,6 +49,7 @@ Dokumen pendukung:
 - [Verify Release](docs/VERIFY_RELEASE.md)
 - [Server Hardening](docs/SERVER_HARDENING.md)
 - [Production Readiness](docs/PRODUCTION_READINESS.md)
+- [QA Release Checklist](docs/QA_RELEASE_CHECKLIST.md)
 - [Server Backup Restore](docs/SERVER_BACKUP_RESTORE.md)
 - [Third-Party Notices](docs/THIRD_PARTY_NOTICES.md)
 - [Source Code Offer](docs/SOURCE_CODE_OFFER.md)
@@ -72,9 +73,12 @@ Dokumen pendukung:
 ```bash
 sudo dw status
 sudo dw templates
+sudo dw audit --save
+sudo dw qa --save
 sudo dw enable web --domain example.com --tls certbot --email admin@example.com --open-firewall
 sudo dw enable ai --runtime ollama --bind 127.0.0.1 --memory-max 8G --cpu-quota 300%
 sudo dw enable container podman
+sudo dw backup create --source /srv/devworks --dest /var/backups/devworks
 ```
   
 ## File ISO
@@ -84,14 +88,11 @@ dist/devworks-server-os.iso
 dist/devworks-server-os-autoinstall.iso
 ```
 
-Checksum build terakhir:
+Checksum build terakhir tersedia di file `.sha256`:
 
 ```text
-devworks-server-os.iso
-SHA256: a5e5c8d4b9d51ccccc9296027b93ac9e4bb207ab6c5aca718ccb0c65dcbe5d79
-
-devworks-server-os-autoinstall.iso
-SHA256: d31a48c842c81ca9f313e4d4a06d0e02081db24554cea915776678175addb921
+dist/devworks-server-os.iso.sha256
+dist/devworks-server-os-autoinstall.iso.sha256
 ```
 
 ## Struktur Proyek
