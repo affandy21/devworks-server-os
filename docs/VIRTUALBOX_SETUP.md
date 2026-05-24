@@ -116,7 +116,8 @@ sudo ufw status verbose
 Cek service:
 
 ```bash
-systemctl is-active ssh nginx ufw fail2ban
+systemctl is-active ssh ufw fail2ban
+sudo devworks status
 ```
 
 Cek SSH dari Windows host:
@@ -174,4 +175,3 @@ Jika SSH tidak bisa:
 sudo systemctl status ssh --no-pager
 sudo ufw status verbose
 ```
-

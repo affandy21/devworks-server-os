@@ -13,8 +13,8 @@ Komponen utama:
 - Desktop XFCE ringan dengan tema Devworks.
 - Devworks Control Center sebagai aplikasi native GTK, bukan browser atau webview.
 - Installer permanen ke disk.
-- SSH, UFW, Fail2ban, Nginx, dan update keamanan otomatis.
-- Dukungan service web dan AI yang dapat dibuat auto-start setelah reboot.
+- SSH, UFW, Fail2ban, tooling Nginx opt-in, dan update keamanan otomatis.
+- Dukungan service web dan AI tersedia sebagai fitur opt-in melalui `devworks`, bukan auto-start bawaan.
 
 ## 2. Status Build Saat Ini
 
@@ -50,7 +50,7 @@ Checksum build terakhir:
 
 ```text
 devworks-server-os.iso
-SHA256: f4ebde934a5da0391b8f82f11a3682ed785e76435085a9e19dacc381b167b7e5
+SHA256: 0c1421f91d8858284afb0de5a2b52ca6ec473c4662c528b91d0a779c56c3d1ec
 
 devworks-server-os-autoinstall.iso
 SHA256: d31a48c842c81ca9f313e4d4a06d0e02081db24554cea915776678175addb921
@@ -254,16 +254,14 @@ Catatan teknis:
 
 ## 12. Service Default
 
-Service yang disiapkan:
+Service yang aktif pada profil production minimal:
 
 ```text
 ssh
-nginx
 ufw
 fail2ban
 chrony
 unattended-upgrades
-devworks-admin-ui
 ```
 
 Service GUI:
@@ -274,6 +272,16 @@ xfce4-session
 ```
 
 Service web dan AI dapat ditambahkan sebagai unit systemd atau container dengan restart policy.
+
+Devworks Server OS tidak menjalankan workload publik secara otomatis. Gunakan:
+
+```bash
+sudo devworks status
+sudo devworks templates
+sudo devworks enable web --domain example.com --tls certbot --email admin@example.com --open-firewall
+sudo devworks enable ai --runtime ollama --bind 127.0.0.1 --memory-max 8G --cpu-quota 300%
+sudo devworks enable container podman
+```
 
 Contoh Docker service policy:
 
@@ -305,8 +313,8 @@ Port yang umum dipakai:
 
 ```text
 22    SSH
-80    HTTP
-443   HTTPS/TLS
+80    HTTP, hanya jika user mengaktifkan web publik
+443   HTTPS/TLS, hanya jika user mengaktifkan web publik
 8088  Devworks Admin UI lama atau API lokal jika diaktifkan
 11434 Ollama atau runtime AI lokal jika dipakai
 ```
@@ -330,13 +338,14 @@ Rekomendasi:
 
 - Gunakan certificate valid dari Let's Encrypt atau certificate resmi lain.
 - Simpan certificate di lokasi standar, misalnya `/etc/letsencrypt`.
-- Pastikan port 80 dan 443 terbuka di firewall.
+- Buka port 80 dan 443 hanya saat web publik siap dipasang.
 - Jalankan renewal otomatis.
 - Uji setelah reboot.
 
-Checklist TLS:
+Aktivasi TLS production:
 
 ```bash
+sudo devworks enable web --domain DOMAIN_ANDA --tls certbot --email admin@example.com --open-firewall
 sudo nginx -t
 sudo systemctl status nginx --no-pager
 curl -I https://DOMAIN_ANDA
@@ -352,11 +361,11 @@ Contoh baseline:
 sudo ufw default deny incoming
 sudo ufw default allow outgoing
 sudo ufw allow OpenSSH
-sudo ufw allow 80/tcp
-sudo ufw allow 443/tcp
 sudo ufw enable
 sudo ufw status verbose
 ```
+
+Port web dibuka oleh `sudo devworks enable web ... --open-firewall` setelah admin memilih domain dan TLS.
 
 Fail2ban digunakan untuk mengurangi brute force SSH.
 
@@ -419,8 +428,8 @@ ip addr
 systemctl --failed
 sudo ufw status verbose
 sudo systemctl status ssh --no-pager
-sudo systemctl status nginx --no-pager
 sudo systemctl status fail2ban --no-pager
+sudo devworks status
 ```
 
 Uji akses SSH:
@@ -429,9 +438,10 @@ Uji akses SSH:
 ssh devworks@IP_SERVER
 ```
 
-Uji HTTP:
+Uji HTTP hanya setelah web diaktifkan:
 
 ```bash
+sudo devworks enable web --domain IP_SERVER --tls off --open-firewall
 curl -I http://IP_SERVER
 ```
 
@@ -459,7 +469,8 @@ Command validasi di guest:
 
 ```bash
 systemctl --failed
-systemctl is-active ssh nginx ufw fail2ban
+systemctl is-active ssh ufw fail2ban
+sudo devworks status
 ```
 
 ## 20. Prosedur Uji Disk Kosong

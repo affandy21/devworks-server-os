@@ -17,10 +17,12 @@ chroot_run test -f /boot/grub/grub.cfg
 chroot_run id "${ADMIN_USER}"
 chroot_run visudo -cf /etc/sudoers
 chroot_run sshd -t
-chroot_run nginx -t
 chroot_run systemctl is-enabled ssh
-chroot_run systemctl is-enabled nginx
 chroot_run test -f /etc/sysctl.d/98-devworks-production-hardening.conf
+chroot_run test -x /usr/local/sbin/devworks
+if chroot_run bash -c 'command -v nginx >/dev/null 2>&1'; then
+  chroot_run nginx -t
+fi
 
 if [[ "${SSH_PASSWORD_AUTH:-yes}" == "no" ]]; then
   chroot_run grep -R "^PasswordAuthentication no" /etc/ssh/sshd_config.d
@@ -34,12 +36,16 @@ if is_yes "${ENABLE_UFW:-yes}"; then
   chroot_run ufw status verbose || true
 fi
 
-if is_yes "${ENABLE_WEB_STACK:-yes}"; then
-  chroot_run systemctl is-enabled "${WEB_SERVICE_NAME}.service"
+if is_yes "${ENABLE_WEB_STACK:-no}"; then
+  chroot_run systemctl is-enabled nginx
+else
+  chroot_run bash -c '! systemctl is-enabled nginx >/dev/null 2>&1'
 fi
 
-if is_yes "${ENABLE_AI_RUNTIME:-yes}"; then
+if is_yes "${ENABLE_AI_RUNTIME:-no}"; then
   chroot_run systemctl is-enabled "${AI_SERVICE_NAME}.service"
+else
+  chroot_run bash -c '! systemctl is-enabled devworks-ai.service >/dev/null 2>&1'
 fi
 
 if is_yes "${ENABLE_GUI:-yes}"; then
@@ -60,6 +66,7 @@ UFW enabled: ${ENABLE_UFW:-yes}
 GUI enabled: ${ENABLE_GUI:-yes}
 Web service: ${WEB_SERVICE_NAME:-devworks-web}
 AI service: ${AI_SERVICE_NAME:-devworks-ai}
+Default workload policy: web/AI/container services disabled until user opt-in
 EOF
 
 log_info "Validation complete."

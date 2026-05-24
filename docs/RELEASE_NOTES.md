@@ -12,7 +12,7 @@ Release preview ini menyiapkan Devworks Server OS sebagai ISO bootable berbasis 
 
 ```text
 dist/devworks-server-os.iso
-SHA256: f4ebde934a5da0391b8f82f11a3682ed785e76435085a9e19dacc381b167b7e5
+SHA256: 0c1421f91d8858284afb0de5a2b52ca6ec473c4662c528b91d0a779c56c3d1ec
 
 dist/devworks-server-os-autoinstall.iso
 SHA256: d31a48c842c81ca9f313e4d4a06d0e02081db24554cea915776678175addb921
@@ -105,3 +105,31 @@ C:\root\backups\devworks-server-backup-20260524-040912.tar.gz.sha256
 - Provide SSH authorized keys before disabling SSH password login.
 - Provide real TLS certificate files or switch to certbot after DNS is ready.
 - Validate restore of each web/AI project from backup.
+
+## v0.1.2-production-readiness
+
+Release line ini mengubah Devworks Server OS menjadi platform server yang lebih aman secara default: OS menyediakan fitur, tetapi tidak menjalankan workload publik sebelum administrator memilih.
+
+### Added
+
+- `devworks` feature manager CLI.
+- Template systemd untuk web app, AI runtime, dan backup timer.
+- Command opt-in untuk web/TLS, AI runtime, dan container.
+- Resource limit AI melalui `MemoryMax` dan `CPUQuota`.
+
+### Changed
+
+- Web stack default: tersedia, tetapi `nginx` tidak enabled.
+- AI runtime default: tidak dibuat dan tidak berjalan.
+- Container runtime default: `none`; Docker daemon tidak enabled otomatis.
+- UFW default: hanya SSH, HTTP/HTTPS dibuka hanya dengan opt-in.
+- Admin web UI default: off; native Control Center tetap tersedia.
+- Production profile tidak lagi meminta TLS file sebelum install. TLS diterbitkan setelah DNS siap.
+
+### Recommended Activation
+
+```bash
+sudo devworks status
+sudo devworks enable web --domain example.com --tls certbot --email admin@example.com --open-firewall
+sudo devworks enable ai --runtime ollama --bind 127.0.0.1 --memory-max 8G --cpu-quota 300%
+```

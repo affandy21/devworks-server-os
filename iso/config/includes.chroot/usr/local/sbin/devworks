@@ -1,0 +1,524 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+WEB_ROOT_DEFAULT="/srv/devworks/web"
+WEB_SITE="/etc/nginx/sites-available/devworks.conf"
+WEB_SITE_LINK="/etc/nginx/sites-enabled/devworks.conf"
+WEB_HEALTH_SCRIPT="/usr/local/sbin/devworks-web-health-check"
+WEB_HEALTH_SERVICE="/etc/systemd/system/devworks-web-health.service"
+WEB_HEALTH_TIMER="/etc/systemd/system/devworks-web-health.timer"
+AI_SERVICE="/etc/systemd/system/devworks-ai.service"
+TEMPLATE_DIR="/etc/devworks/templates"
+TLS_DIR="/etc/devworks/tls"
+
+usage() {
+  cat <<'EOF'
+Devworks Server OS feature manager
+
+Usage:
+  devworks status
+  devworks templates
+  devworks install-packages web|ai-host|podman|docker
+  devworks enable web [--root PATH] [--domain DOMAIN] [--tls off|self-signed|certbot] [--email EMAIL] [--open-firewall]
+  devworks disable web [--close-firewall]
+  devworks enable ai [--runtime ollama|placeholder] [--port PORT] [--bind ADDRESS] [--memory-max VALUE] [--cpu-quota VALUE] [--open-firewall]
+  devworks disable ai [--close-firewall]
+  devworks enable container podman|docker
+  devworks disable container docker
+
+Defaults are conservative:
+  - web, AI, and container daemons are not enabled automatically
+  - public HTTP/HTTPS/AI firewall rules are opt-in
+  - AI binds to 127.0.0.1 unless explicitly changed
+EOF
+}
+
+require_root() {
+  if [[ "${EUID}" -ne 0 ]]; then
+    echo "Run as root: sudo devworks $*" >&2
+    exit 1
+  fi
+}
+
+have() { command -v "$1" >/dev/null 2>&1; }
+
+can_start_units() {
+  [[ -d /run/systemd/system ]] && ! systemd-detect-virt --quiet --chroot 2>/dev/null
+}
+
+enable_unit() {
+  if can_start_units; then
+    systemctl enable --now "$@"
+  else
+    systemctl enable "$@"
+  fi
+}
+
+disable_unit() {
+  if can_start_units; then
+    systemctl disable --now "$@" 2>/dev/null || true
+  else
+    systemctl disable "$@" 2>/dev/null || true
+  fi
+}
+
+apt_install() {
+  require_root "$@"
+  apt-get update
+  DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends "$@"
+}
+
+unit_state() {
+  local unit="$1"
+  if systemctl list-unit-files --no-legend "${unit}" >/dev/null 2>&1; then
+    printf '%-28s enabled=%-10s active=%s\n' \
+      "${unit}" \
+      "$(systemctl is-enabled "${unit}" 2>/dev/null || true)" \
+      "$(systemctl is-active "${unit}" 2>/dev/null || true)"
+  else
+    printf '%-28s not-installed\n' "${unit}"
+  fi
+}
+
+firewall_allow() {
+  local port="$1"
+  if have ufw; then
+    ufw allow "${port}/tcp"
+  fi
+}
+
+firewall_delete_allow() {
+  local port="$1"
+  if have ufw; then
+    ufw delete allow "${port}/tcp" || true
+  fi
+}
+
+write_templates() {
+  require_root "$@"
+  install -d -m 0755 "${TEMPLATE_DIR}/systemd" "${TEMPLATE_DIR}/nginx" "${TEMPLATE_DIR}/backup"
+
+  cat > "${TEMPLATE_DIR}/systemd/devworks-web-app.service.example" <<'EOF'
+[Unit]
+Description=Example Devworks web application
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/srv/devworks/app
+Environment=NODE_ENV=production
+ExecStart=/usr/bin/env bash -lc 'npm start'
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+  cat > "${TEMPLATE_DIR}/systemd/devworks-ai-runtime.service.example" <<'EOF'
+[Unit]
+Description=Example Devworks AI runtime
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=devworks
+Group=devworks
+Environment=OLLAMA_HOST=127.0.0.1:11434
+ExecStart=/usr/local/bin/ollama serve
+Restart=on-failure
+RestartSec=10
+MemoryMax=8G
+CPUQuota=300%
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+  cat > "${TEMPLATE_DIR}/nginx/devworks-reverse-proxy.conf.example" <<'EOF'
+server {
+    listen 80;
+    server_name example.com;
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/html;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+EOF
+
+  cat > "${TEMPLATE_DIR}/backup/devworks-backup.timer.example" <<'EOF'
+[Unit]
+Description=Example Devworks backup schedule
+
+[Timer]
+OnCalendar=*-*-* 02:30:00
+Persistent=true
+Unit=devworks-backup.service
+
+[Install]
+WantedBy=timers.target
+EOF
+}
+
+install_web_packages() {
+  if ! have nginx; then
+    apt_install nginx-light ca-certificates curl openssl
+  fi
+  if ! have certbot; then
+    apt_install certbot python3-certbot-nginx
+  fi
+}
+
+install_ai_host_packages() {
+  apt_install python3 python3-venv python3-pip build-essential pkg-config cmake git-lfs
+}
+
+enable_web() {
+  require_root "$@"
+  local root="${WEB_ROOT_DEFAULT}"
+  local domain="_"
+  local tls="off"
+  local email=""
+  local open_firewall="no"
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --root) root="$2"; shift 2 ;;
+      --domain) domain="$2"; shift 2 ;;
+      --tls) tls="$2"; shift 2 ;;
+      --email) email="$2"; shift 2 ;;
+      --open-firewall) open_firewall="yes"; shift ;;
+      *) echo "Unknown web option: $1" >&2; exit 2 ;;
+    esac
+  done
+
+  install_web_packages
+  install -d -m 0755 "${root}" "${TLS_DIR}"
+  if [[ ! -f "${root}/index.html" ]]; then
+    cat > "${root}/index.html" <<'EOF'
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Devworks Server OS</title></head>
+<body><h1>Devworks Server OS</h1><p>Web feature enabled. Replace this file with your application.</p></body>
+</html>
+EOF
+  fi
+
+  cat > "${WEB_SITE}" <<EOF
+server {
+    listen 80 default_server;
+    server_name ${domain};
+    root ${root};
+    index index.html;
+
+    location / {
+        try_files \$uri \$uri/ =404;
+    }
+
+    location /health {
+        add_header Content-Type text/plain;
+        return 200 "ok\\n";
+    }
+}
+EOF
+
+  case "${tls}" in
+    off) ;;
+    self-signed)
+      openssl req -x509 -newkey rsa:4096 -sha256 -days 825 -nodes \
+        -keyout "${TLS_DIR}/devworks.key" \
+        -out "${TLS_DIR}/devworks.crt" \
+        -subj "/CN=${domain}" \
+        -addext "subjectAltName=DNS:${domain},DNS:localhost,IP:127.0.0.1"
+      chmod 0600 "${TLS_DIR}/devworks.key"
+      cat >> "${WEB_SITE}" <<EOF
+
+server {
+    listen 443 ssl;
+    server_name ${domain};
+    root ${root};
+    index index.html;
+
+    ssl_certificate ${TLS_DIR}/devworks.crt;
+    ssl_certificate_key ${TLS_DIR}/devworks.key;
+    ssl_protocols TLSv1.2 TLSv1.3;
+
+    location / {
+        try_files \$uri \$uri/ =404;
+    }
+
+    location /health {
+        add_header Content-Type text/plain;
+        return 200 "ok\\n";
+    }
+}
+EOF
+      ;;
+    certbot)
+      if [[ -z "${email}" || "${domain}" == "_" ]]; then
+        echo "Certbot mode requires --domain example.com and --email admin@example.com." >&2
+        exit 2
+      fi
+      ;;
+    *) echo "Unsupported TLS mode: ${tls}" >&2; exit 2 ;;
+  esac
+
+  rm -f /etc/nginx/sites-enabled/default
+  ln -sf "${WEB_SITE}" "${WEB_SITE_LINK}"
+
+  cat > "${WEB_HEALTH_SCRIPT}" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+curl -fsS --max-time 10 http://127.0.0.1/health >/dev/null
+if ss -tln | grep -q ':443 '; then
+  curl -kfsS --max-time 10 https://127.0.0.1/health >/dev/null
+fi
+EOF
+  chmod 0755 "${WEB_HEALTH_SCRIPT}"
+
+  cat > "${WEB_HEALTH_SERVICE}" <<'EOF'
+[Unit]
+Description=Devworks web health check
+After=network-online.target nginx.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/devworks-web-health-check
+EOF
+
+  cat > "${WEB_HEALTH_TIMER}" <<'EOF'
+[Unit]
+Description=Run Devworks web health check periodically
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=5min
+AccuracySec=30s
+Unit=devworks-web-health.service
+
+[Install]
+WantedBy=timers.target
+EOF
+
+  nginx -t
+  systemctl daemon-reload
+  enable_unit nginx
+  enable_unit devworks-web-health.timer
+
+  if [[ "${tls}" == "certbot" ]]; then
+    certbot --nginx -d "${domain}" --email "${email}" --agree-tos --no-eff-email
+  fi
+
+  if [[ "${open_firewall}" == "yes" ]]; then
+    firewall_allow 80
+    [[ "${tls}" != "off" ]] && firewall_allow 443
+  fi
+
+  echo "Web feature enabled. Root: ${root}"
+}
+
+disable_web() {
+  require_root "$@"
+  local close_firewall="no"
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --close-firewall) close_firewall="yes"; shift ;;
+      *) echo "Unknown web option: $1" >&2; exit 2 ;;
+    esac
+  done
+  disable_unit devworks-web-health.timer
+  disable_unit nginx
+  if [[ "${close_firewall}" == "yes" ]]; then
+    firewall_delete_allow 80
+    firewall_delete_allow 443
+  fi
+  echo "Web feature disabled."
+}
+
+enable_ai() {
+  require_root "$@"
+  local runtime="ollama"
+  local port="11434"
+  local bind="127.0.0.1"
+  local memory_max="8G"
+  local cpu_quota="300%"
+  local open_firewall="no"
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --runtime) runtime="$2"; shift 2 ;;
+      --port) port="$2"; shift 2 ;;
+      --bind) bind="$2"; shift 2 ;;
+      --memory-max) memory_max="$2"; shift 2 ;;
+      --cpu-quota) cpu_quota="$2"; shift 2 ;;
+      --open-firewall) open_firewall="yes"; shift ;;
+      *) echo "Unknown AI option: $1" >&2; exit 2 ;;
+    esac
+  done
+
+  case "${runtime}" in
+    ollama)
+      if ! have ollama; then
+        echo "Ollama is not installed. Install your AI runtime first, then rerun this command." >&2
+        exit 1
+      fi
+      exec_start="/usr/bin/env ollama serve"
+      env_line="Environment=OLLAMA_HOST=${bind}:${port}"
+      ;;
+    placeholder)
+      apt_install python3
+      exec_start="/usr/bin/python3 -m http.server ${port} --bind ${bind}"
+      env_line="# Environment intentionally empty for placeholder runtime"
+      ;;
+    *) echo "Unsupported AI runtime: ${runtime}" >&2; exit 2 ;;
+  esac
+
+  cat > "${AI_SERVICE}" <<EOF
+[Unit]
+Description=Devworks AI runtime (${runtime})
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+${env_line}
+ExecStart=${exec_start}
+Restart=on-failure
+RestartSec=10
+MemoryMax=${memory_max}
+CPUQuota=${cpu_quota}
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+  systemctl daemon-reload
+  enable_unit devworks-ai.service
+
+  if [[ "${open_firewall}" == "yes" ]]; then
+    firewall_allow "${port}"
+  fi
+
+  echo "AI feature enabled on ${bind}:${port} with MemoryMax=${memory_max}, CPUQuota=${cpu_quota}."
+}
+
+disable_ai() {
+  require_root "$@"
+  local close_firewall="no"
+  local port="11434"
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --close-firewall) close_firewall="yes"; shift ;;
+      --port) port="$2"; shift 2 ;;
+      *) echo "Unknown AI option: $1" >&2; exit 2 ;;
+    esac
+  done
+  disable_unit devworks-ai.service
+  if [[ "${close_firewall}" == "yes" ]]; then
+    firewall_delete_allow "${port}"
+  fi
+  echo "AI feature disabled."
+}
+
+enable_container() {
+  require_root "$@"
+  local runtime="${1:-}"
+  case "${runtime}" in
+    podman)
+      apt_install podman slirp4netns fuse-overlayfs
+      echo "Podman installed. No daemon was enabled."
+      ;;
+    docker)
+      apt_install docker.io docker-compose
+      enable_unit docker
+      echo "Docker installed and enabled by explicit request."
+      ;;
+    *) echo "Usage: devworks enable container podman|docker" >&2; exit 2 ;;
+  esac
+}
+
+disable_container() {
+  require_root "$@"
+  local runtime="${1:-}"
+  case "${runtime}" in
+    docker)
+      disable_unit docker
+      echo "Docker disabled."
+      ;;
+    podman)
+      echo "Podman has no always-on daemon to disable."
+      ;;
+    *) echo "Usage: devworks disable container docker|podman" >&2; exit 2 ;;
+  esac
+}
+
+status() {
+  echo "Devworks Server OS feature status"
+  unit_state ssh
+  unit_state ufw
+  unit_state nginx
+  unit_state devworks-web-health.timer
+  unit_state devworks-ai.service
+  unit_state docker
+  unit_state fail2ban
+  if have ufw; then
+    echo
+    ufw status verbose || true
+  fi
+}
+
+case "${1:-}" in
+  status) status ;;
+  templates) write_templates; find "${TEMPLATE_DIR}" -type f | sort ;;
+  install-packages)
+    case "${2:-}" in
+      web) install_web_packages ;;
+      ai-host) install_ai_host_packages ;;
+      podman) enable_container podman ;;
+      docker) apt_install docker.io docker-compose; disable_unit docker ;;
+      *) echo "Usage: devworks install-packages web|ai-host|podman|docker" >&2; exit 2 ;;
+    esac
+    ;;
+  enable)
+    shift
+    case "${1:-}" in
+      web) shift; enable_web "$@" ;;
+      ai) shift; enable_ai "$@" ;;
+      container) shift; enable_container "$@" ;;
+      *) usage; exit 2 ;;
+    esac
+    ;;
+  disable)
+    shift
+    case "${1:-}" in
+      web) shift; disable_web "$@" ;;
+      ai) shift; disable_ai "$@" ;;
+      container) shift; disable_container "$@" ;;
+      *) usage; exit 2 ;;
+    esac
+    ;;
+  help|--help|-h|"") usage ;;
+  *) usage; exit 2 ;;
+esac

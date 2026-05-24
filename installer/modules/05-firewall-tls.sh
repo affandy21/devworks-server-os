@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
 
 : "${ENABLE_UFW:=yes}"
-: "${ALLOW_HTTP:=yes}"
-: "${ALLOW_HTTPS:=yes}"
+: "${ALLOW_HTTP:=no}"
+: "${ALLOW_HTTPS:=no}"
 : "${ALLOW_ADMIN_UI_PORT:=no}"
 : "${ADMIN_UI_PORT:=8088}"
-: "${TLS_MODE:=self-signed}"
+: "${TLS_MODE:=off}"
 : "${TLS_DOMAIN:=devworks.local}"
 : "${TLS_CERT_SOURCE:=}"
 : "${TLS_KEY_SOURCE:=}"
 : "${CERTBOT_EMAIL:=admin@example.com}"
 
-log_info "Configuring firewall and TLS"
+log_info "Configuring firewall and optional TLS material"
 
-apt_install_target nginx-light openssl
+apt_install_target openssl
 
 if is_yes "${ENABLE_UFW}"; then
   chroot_run ufw --force reset
@@ -45,63 +45,26 @@ case "${TLS_MODE}" in
     ;;
   certbot)
     apt_install_target certbot python3-certbot-nginx
-    log_warn "Certbot installed. Certificate issuance must run after DNS points to this host."
+    log_warn "Certbot installed. Certificate issuance remains opt-in via: sudo devworks enable web --tls certbot ..."
     ;;
   off)
-    log_warn "TLS_MODE=off; HTTPS nginx config will not be enabled."
+    log_info "TLS_MODE=off; no certificate is generated during installation."
     ;;
   *)
     die "Unsupported TLS_MODE: ${TLS_MODE}"
     ;;
 esac
 
-mkdir -p "${INSTALL_ROOT}/etc/nginx/sites-available" "${INSTALL_ROOT}/etc/nginx/sites-enabled" "${INSTALL_ROOT}${WEB_ROOT:-/srv/devworks/web}"
-cat > "${INSTALL_ROOT}/etc/nginx/sites-available/devworks.conf" <<EOF
-server {
-    listen 80 default_server;
-    server_name _;
-    root ${WEB_ROOT:-/srv/devworks/web};
-    index index.html;
+cat > "${INSTALL_ROOT}/etc/devworks/tls/README" <<EOF
+Devworks Server OS does not publish HTTPS automatically.
 
-    location / {
-        try_files \$uri \$uri/ =404;
-    }
+After DNS points to this server, enable web/TLS explicitly, for example:
 
-    location /health {
-        add_header Content-Type text/plain;
-        return 200 "ok\\n";
-    }
-}
+  sudo devworks enable web --domain example.com --tls certbot --email admin@example.com --open-firewall
+
+For a local self-signed test:
+
+  sudo devworks enable web --domain devworks.local --tls self-signed
 EOF
 
-if [[ "${TLS_MODE}" != "off" && "${TLS_MODE}" != "certbot" ]]; then
-  cat >> "${INSTALL_ROOT}/etc/nginx/sites-available/devworks.conf" <<EOF
-
-server {
-    listen 443 ssl;
-    server_name _;
-    root ${WEB_ROOT:-/srv/devworks/web};
-    index index.html;
-
-    ssl_certificate /etc/devworks/tls/devworks.crt;
-    ssl_certificate_key /etc/devworks/tls/devworks.key;
-    ssl_protocols TLSv1.2 TLSv1.3;
-    ssl_prefer_server_ciphers off;
-
-    location / {
-        try_files \$uri \$uri/ =404;
-    }
-
-    location /health {
-        add_header Content-Type text/plain;
-        return 200 "ok\\n";
-    }
-}
-EOF
-fi
-
-rm -f "${INSTALL_ROOT}/etc/nginx/sites-enabled/default"
-ln -sf /etc/nginx/sites-available/devworks.conf "${INSTALL_ROOT}/etc/nginx/sites-enabled/devworks.conf"
-chroot_run systemctl enable nginx
-
-log_info "Firewall and TLS configuration complete."
+log_info "Firewall configured. Public web ports remain closed unless explicitly allowed."

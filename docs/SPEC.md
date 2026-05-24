@@ -17,6 +17,7 @@ Devworks Server OS ditujukan untuk admin server yang ingin menjalankan:
 - Basis OS memakai Debian Stable agar stabil dan mudah diaudit.
 - Sistem tetap sederhana, tidak membuat kernel baru dari nol.
 - Workload aplikasi disarankan berjalan sebagai systemd service atau container.
+- Workload web, AI, container daemon, dan port publik tidak aktif otomatis; administrator mengaktifkannya melalui `devworks`.
 - GUI dipakai untuk administrasi dan monitoring, bukan sebagai lapisan wajib untuk menjalankan server.
 - Konfigurasi penting tetap berbasis file teks dan systemd.
 - Operasi destructive wajib memakai konfirmasi manual pada ISO standar.
@@ -33,13 +34,14 @@ Devworks Server OS ditujukan untuk admin server yang ingin menjalankan:
 | Desktop | XFCE ringan |
 | Display manager | LightDM |
 | Monitoring GUI | Devworks Control Center native GTK |
-| Web server | Nginx |
+| Web server | Nginx tersedia sebagai fitur opt-in |
 | SSH | OpenSSH |
 | Firewall | UFW |
 | Brute-force protection | Fail2ban |
 | Time sync | Chrony |
 | Security updates | unattended-upgrades |
 | Installer | Devworks permanent disk installer |
+| Feature manager | `devworks` CLI |
 
 ## UI/UX
 
@@ -59,6 +61,27 @@ Devworks Control Center menampilkan:
 - Network throughput.
 - Kernel, hostname, uptime, dan informasi runtime.
 - Status service penting.
+- Status service opsional ditampilkan sebagai komponen yang bisa diaktifkan, bukan diasumsikan wajib berjalan.
+
+## Kebijakan Workload Default
+
+Setelah instalasi production, OS hanya menyiapkan platform:
+
+- SSH dan firewall aktif.
+- Update keamanan otomatis aktif.
+- GUI/native monitoring tersedia jika profil GUI dipilih.
+- Web stack tersedia tetapi `nginx` tidak enabled.
+- AI runtime tidak dibuat atau dijalankan.
+- Docker daemon tidak enabled; Podman dapat dipasang tanpa daemon.
+- Port 80, 443, 11434, dan 8088 tidak dibuka kecuali user memilih.
+
+Aktivasi dilakukan secara eksplisit:
+
+```bash
+sudo devworks enable web --domain example.com --tls certbot --email admin@example.com --open-firewall
+sudo devworks enable ai --runtime ollama --bind 127.0.0.1
+sudo devworks enable container podman
+```
 
 ## Installer
 
@@ -90,4 +113,3 @@ DEVWORKS_I_UNDERSTAND_THIS_ERASES_DISK=yes
 - Repository update OS milik Devworks belum tersedia.
 - Driver GPU AI production perlu disesuaikan dengan hardware target.
 - Autentikasi dan role management untuk admin tooling perlu dikeraskan sebelum production publik.
-

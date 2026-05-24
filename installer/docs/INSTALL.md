@@ -58,9 +58,12 @@ partitions.
 - `SSH_KEY_SETUP_MODE`: `prompt`, `required`, or `skip`.
 - `SSH_AUTHORIZED_KEYS_FILE`: SSH public keys copied into the admin account.
 - `ENABLE_UFW`: firewall activation.
-- `TLS_MODE`: `self-signed`, `existing`, `certbot`, or `off`.
-- `ENABLE_WEB_STACK`: enables nginx and web target service.
-- `ENABLE_AI_RUNTIME`: enables AI runtime service.
+- `TLS_MODE`: `off`, `self-signed`, `existing`, or `certbot`; default `off`.
+- `ENABLE_WEB_STACK`: explicit opt-in to enable nginx during install; default `no`.
+- `ENABLE_AI_RUNTIME`: explicit opt-in to enable AI runtime during install; default `no`.
+- `ENABLE_CONTAINER_RUNTIME`: explicit opt-in for `podman` or `docker`; default `none`.
+- `INSTALL_WEB_FEATURE_PACKAGES`: install web tooling without enabling public web service.
+- `ENABLE_SERVICE_WIZARD`: installs the `devworks` feature manager and service templates.
 - `ENABLE_GUI`: installs XFCE and LightDM.
 - `ENABLE_NATIVE_MONITOR`: installs native Devworks Control Center.
 
@@ -73,7 +76,10 @@ ADMIN_PASSWORD_MODE="prompt"
 ENABLE_AUTOLOGIN="no"
 SSH_PASSWORD_AUTH="no"
 SSH_KEY_SETUP_MODE="required"
-TLS_MODE="existing"
+TLS_MODE="off"
+ENABLE_WEB_STACK="no"
+ENABLE_AI_RUNTIME="no"
+ENABLE_CONTAINER_RUNTIME="none"
 ENABLE_AUTO_REBOOT_AFTER_SECURITY_UPDATE="no"
 ```
 
@@ -86,3 +92,18 @@ SSH_AUTHORIZED_KEYS_FILE="/root/authorized_keys"
 For manual installs, the recommended path is to let the installer prompt for
 the admin username, full name, password, and SSH public key path. Do not keep a
 shared default password in production profiles.
+
+## Feature Activation After Install
+
+The production default is intentionally quiet. Web apps, AI runtimes, container
+daemons, and public HTTP/HTTPS firewall rules are not started automatically.
+
+Use the feature manager after first login:
+
+```bash
+sudo devworks status
+sudo devworks templates
+sudo devworks enable web --domain example.com --tls certbot --email admin@example.com --open-firewall
+sudo devworks enable ai --runtime ollama --bind 127.0.0.1 --memory-max 8G --cpu-quota 300%
+sudo devworks enable container podman
+```

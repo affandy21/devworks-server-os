@@ -1,4 +1,4 @@
-# Devworks Server OS v0.1.1 Server Hardening
+# Devworks Server OS Server Hardening
 
 This document describes the production-oriented hardening profile for Devworks Server OS.
 
@@ -16,9 +16,10 @@ It is more secure than the preview profile, but every production deployment must
 - SSH empty passwords disabled.
 - SSH max authentication tries reduced.
 - Admin username/password can be collected interactively during installation.
-- Admin web UI binds to `127.0.0.1` by default.
-- UFW allows only SSH, HTTP, and HTTPS by default.
-- Admin UI port `8088` is not opened by UFW.
+- Admin web UI is disabled by default; native Control Center remains available on GUI installs.
+- UFW allows only SSH by default.
+- HTTP, HTTPS, AI, container daemons, and admin UI ports are opt-in.
+- The `devworks` CLI provides explicit web, TLS, AI, container, and template activation.
 - Kernel/network sysctl hardening profile installed.
 - Production installer validation checks SSH, autologin, and hardening files.
 - Dedicated `installer/profiles/production-server.env` profile added.
@@ -38,8 +39,9 @@ TARGET_DISK
 ADMIN_PASSWORD_MODE
 SSH_AUTHORIZED_KEYS_FILE
 TLS_DOMAIN
-TLS_CERT_SOURCE
-TLS_KEY_SOURCE
+ENABLE_WEB_STACK
+ENABLE_AI_RUNTIME
+ENABLE_CONTAINER_RUNTIME
 ```
 
 The installer remains destructive in `erase-disk` mode. It is suitable for an empty server disk, not a dualboot disk.
@@ -50,8 +52,6 @@ Production profile expects:
 
 ```text
 /root/devworks-authorized_keys
-/root/tls/fullchain.pem
-/root/tls/privkey.pem
 ```
 
 The production profile requires `/root/devworks-authorized_keys`. This avoids creating a server where SSH password login is disabled but no key is installed.
@@ -84,9 +84,7 @@ After boot:
 sudo devworks-validation-checklist
 systemctl --failed
 sudo ufw status verbose
-sudo nginx -t
-curl -I http://127.0.0.1/health
-curl -kI https://127.0.0.1/health
+sudo devworks status
 ```
 
 SSH from another machine:
@@ -95,24 +93,27 @@ SSH from another machine:
 ssh devworks@SERVER_IP
 ```
 
-## Admin UI Access
+## Enabling Public Web/TLS
 
-The remote admin web UI binds to localhost:
-
-```text
-127.0.0.1:8088
-```
-
-Use SSH tunneling if needed:
+Production installs do not publish a web service until the administrator opts in:
 
 ```bash
-ssh -L 8088:127.0.0.1:8088 devworks@SERVER_IP
+sudo devworks enable web --domain example.com --tls certbot --email admin@example.com --open-firewall
+sudo devworks status
 ```
 
-Then open:
+For a local HTTPS smoke test without opening public ports:
 
-```text
-http://127.0.0.1:8088
+```bash
+sudo devworks enable web --domain devworks.local --tls self-signed
+```
+
+## Enabling AI
+
+AI is always opt-in because it can consume large CPU, RAM, and GPU resources:
+
+```bash
+sudo devworks enable ai --runtime ollama --bind 127.0.0.1 --memory-max 8G --cpu-quota 300%
 ```
 
 ## Still Not Included

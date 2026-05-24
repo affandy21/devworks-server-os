@@ -6,9 +6,11 @@
     devworks_hostname: devworks-server
     devworks_ssh_port: 22
     devworks_enable_gui: true
-    devworks_enable_admin_ui: true
-    devworks_enable_ai: true
-    devworks_tls_mode: self-signed
+    devworks_enable_admin_ui: false
+    devworks_enable_web: false
+    devworks_open_web_firewall: false
+    devworks_enable_ai: false
+    devworks_tls_mode: off
   roles:
     - devworks-base
     - devworks-security

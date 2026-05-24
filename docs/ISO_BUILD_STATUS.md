@@ -13,7 +13,7 @@ dist/devworks-server-os-autoinstall.iso
 
 ```text
 devworks-server-os.iso
-SHA256: f4ebde934a5da0391b8f82f11a3682ed785e76435085a9e19dacc381b167b7e5
+SHA256: 0c1421f91d8858284afb0de5a2b52ca6ec473c4662c528b91d0a779c56c3d1ec
 
 devworks-server-os-autoinstall.iso
 SHA256: d31a48c842c81ca9f313e4d4a06d0e02081db24554cea915776678175addb921

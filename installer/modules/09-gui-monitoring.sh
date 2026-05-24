@@ -2,7 +2,7 @@
 
 : "${ENABLE_GUI:=yes}"
 : "${ENABLE_NATIVE_MONITOR:=yes}"
-: "${ENABLE_ADMIN_WEB_UI:=yes}"
+: "${ENABLE_ADMIN_WEB_UI:=no}"
 : "${ADMIN_WEB_UI_BIND:=127.0.0.1}"
 : "${WALLPAPER_SOURCE:=/usr/share/backgrounds/halo/devworks-wallpaper.png}"
 
@@ -115,7 +115,7 @@ if is_yes "${ENABLE_ADMIN_WEB_UI}"; then
   if [[ -d "${PROJECT_DIR}/admin-ui" ]]; then
     rsync -a "${PROJECT_DIR}/admin-ui/" "${INSTALL_ROOT}/opt/devworks/admin-ui/"
   fi
-  cat > "${INSTALL_ROOT}/etc/systemd/system/devworks-admin-ui.service" <<'EOF'
+  cat > "${INSTALL_ROOT}/etc/systemd/system/devworks-admin-ui.service" <<EOF
 [Unit]
 Description=Devworks Admin UI
 After=network-online.target
@@ -135,6 +135,9 @@ RestartSec=5
 WantedBy=multi-user.target
 EOF
   chroot_run systemctl enable devworks-admin-ui.service
+else
+  rm -f "${INSTALL_ROOT}/etc/systemd/system/devworks-admin-ui.service"
+  log_info "Admin web UI is installed only when explicitly enabled; native Control Center remains available."
 fi
 
 chroot_run gtk-update-icon-cache -f -t /usr/share/icons/hicolor || true

@@ -7,7 +7,7 @@
 [![License](https://img.shields.io/badge/license-proprietary-red)](LICENSE)
 
 
-Devworks Server OS adalah distribusi Linux kustom berbasis Debian Stable yang dirancang sebagai lingkungan server web, runtime AI lokal, serta monitoring sistem.
+Devworks Server OS adalah distribusi Linux kustom berbasis Debian Stable yang dirancang sebagai platform server publik dengan monitoring lokal, hardening dasar, dan fitur web/AI yang diaktifkan secara sadar oleh administrator.
 
 Build saat ini telah mencakup ISO bootable, desktop GUI ringan, Devworks Control Center berbasis aplikasi native, serta installer permanen ke disk. Sistem ini cocok digunakan untuk pembelajaran server secara langsung, eksperimen lokal, dan pengembangan dalam lingkungan yang aman dan terkontrol.
 
@@ -48,6 +48,7 @@ Dokumen pendukung:
 - [Roadmap](docs/ROADMAP.md)
 - [Verify Release](docs/VERIFY_RELEASE.md)
 - [Server Hardening](docs/SERVER_HARDENING.md)
+- [Production Readiness](docs/PRODUCTION_READINESS.md)
 - [Server Backup Restore](docs/SERVER_BACKUP_RESTORE.md)
 - [Third-Party Notices](docs/THIRD_PARTY_NOTICES.md)
 - [Source Code Offer](docs/SOURCE_CODE_OFFER.md)
@@ -59,10 +60,22 @@ Dokumen pendukung:
 - Menyediakan desktop GUI ringan.
 - Devworks Control Center berjalan sebagai aplikasi native.
 - Monitoring realtime tersedia untuk CPU, memori, disk, jaringan, dan service sistem.
+- Default install tidak menjalankan workload web, AI, container daemon, atau port publik sebelum user mengaktifkannya.
+- Command `devworks` menyediakan fitur opt-in untuk web, TLS, AI runtime, container, dan template service.
 - Installer menggunakan konfirmasi disk manual untuk mengurangi risiko salah memilih disk.
 - Installer permanen meminta username/password admin dan dapat memasang SSH key seperti OS server umum.
 - Instalasi dual-boot otomatis belum didukung. Mode installer saat ini adalah `erase-disk`.
-- Profil `production-server` tersedia untuk hardening server: autologin off, SSH key-first, admin UI local-only, UFW ketat.
+- Profil `production-server` tersedia untuk hardening server: autologin off, SSH key-first, admin web UI off, UFW ketat, web/AI opt-in.
+
+## Aktivasi Fitur Setelah Install
+
+```bash
+sudo devworks status
+sudo devworks templates
+sudo devworks enable web --domain example.com --tls certbot --email admin@example.com --open-firewall
+sudo devworks enable ai --runtime ollama --bind 127.0.0.1 --memory-max 8G --cpu-quota 300%
+sudo devworks enable container podman
+```
   
 ## File ISO
 
@@ -75,7 +88,7 @@ Checksum build terakhir:
 
 ```text
 devworks-server-os.iso
-SHA256: 7c8a48cac05609b2ca16a9232159854b8a3c3f9ce16352b088ad473dbf284119
+SHA256: 0c1421f91d8858284afb0de5a2b52ca6ec473c4662c528b91d0a779c56c3d1ec
 
 devworks-server-os-autoinstall.iso
 SHA256: d31a48c842c81ca9f313e4d4a06d0e02081db24554cea915776678175addb921
