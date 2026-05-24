@@ -84,7 +84,7 @@ After boot:
 sudo devworks-validation-checklist
 systemctl --failed
 sudo ufw status verbose
-sudo devworks status
+sudo dw status
 ```
 
 SSH from another machine:
@@ -98,14 +98,14 @@ ssh devworks@SERVER_IP
 Production installs do not publish a web service until the administrator opts in:
 
 ```bash
-sudo devworks enable web --domain example.com --tls certbot --email admin@example.com --open-firewall
-sudo devworks status
+sudo dw enable web --domain example.com --tls certbot --email admin@example.com --open-firewall
+sudo dw status
 ```
 
 For a local HTTPS smoke test without opening public ports:
 
 ```bash
-sudo devworks enable web --domain devworks.local --tls self-signed
+sudo dw enable web --domain devworks.local --tls self-signed
 ```
 
 ## Enabling AI
@@ -113,7 +113,7 @@ sudo devworks enable web --domain devworks.local --tls self-signed
 AI is always opt-in because it can consume large CPU, RAM, and GPU resources:
 
 ```bash
-sudo devworks enable ai --runtime ollama --bind 127.0.0.1 --memory-max 8G --cpu-quota 300%
+sudo dw enable ai --runtime ollama --bind 127.0.0.1 --memory-max 8G --cpu-quota 300%
 ```
 
 ## Still Not Included

@@ -20,6 +20,7 @@ chroot_run sshd -t
 chroot_run systemctl is-enabled ssh
 chroot_run test -f /etc/sysctl.d/98-devworks-production-hardening.conf
 chroot_run test -x /usr/local/sbin/devworks
+chroot_run test -L /usr/local/sbin/dw
 if chroot_run bash -c 'command -v nginx >/dev/null 2>&1'; then
   chroot_run nginx -t
 fi

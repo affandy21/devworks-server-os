@@ -63,7 +63,7 @@ partitions.
 - `ENABLE_AI_RUNTIME`: explicit opt-in to enable AI runtime during install; default `no`.
 - `ENABLE_CONTAINER_RUNTIME`: explicit opt-in for `podman` or `docker`; default `none`.
 - `INSTALL_WEB_FEATURE_PACKAGES`: install web tooling without enabling public web service.
-- `ENABLE_SERVICE_WIZARD`: installs the `devworks` feature manager and service templates.
+- `ENABLE_SERVICE_WIZARD`: installs the `dw`/`devworks` feature manager and service templates.
 - `ENABLE_GUI`: installs XFCE and LightDM.
 - `ENABLE_NATIVE_MONITOR`: installs native Devworks Control Center.
 
@@ -98,12 +98,13 @@ shared default password in production profiles.
 The production default is intentionally quiet. Web apps, AI runtimes, container
 daemons, and public HTTP/HTTPS firewall rules are not started automatically.
 
-Use the feature manager after first login:
+Use the feature manager after first login. `dw` is the short command; `devworks`
+is kept as the long canonical command.
 
 ```bash
-sudo devworks status
-sudo devworks templates
-sudo devworks enable web --domain example.com --tls certbot --email admin@example.com --open-firewall
-sudo devworks enable ai --runtime ollama --bind 127.0.0.1 --memory-max 8G --cpu-quota 300%
-sudo devworks enable container podman
+sudo dw status
+sudo dw templates
+sudo dw enable web --domain example.com --tls certbot --email admin@example.com --open-firewall
+sudo dw enable ai --runtime ollama --bind 127.0.0.1 --memory-max 8G --cpu-quota 300%
+sudo dw enable container podman
 ```

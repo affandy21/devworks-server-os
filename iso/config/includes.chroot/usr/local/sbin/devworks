@@ -16,6 +16,16 @@ usage() {
 Devworks Server OS feature manager
 
 Usage:
+  dw status
+  dw templates
+  dw enable web [--root PATH] [--domain DOMAIN] [--tls off|self-signed|certbot] [--email EMAIL] [--open-firewall]
+  dw disable web [--close-firewall]
+  dw enable ai [--runtime ollama|placeholder] [--port PORT] [--bind ADDRESS] [--memory-max VALUE] [--cpu-quota VALUE] [--open-firewall]
+  dw disable ai [--close-firewall]
+  dw enable container podman|docker
+  dw disable container docker
+
+Long form:
   devworks status
   devworks templates
   devworks install-packages web|ai-host|podman|docker
@@ -35,7 +45,7 @@ EOF
 
 require_root() {
   if [[ "${EUID}" -ne 0 ]]; then
-    echo "Run as root: sudo devworks $*" >&2
+    echo "Run as root: sudo dw $*" >&2
     exit 1
   fi
 }

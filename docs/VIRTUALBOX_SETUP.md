@@ -117,7 +117,7 @@ Cek service:
 
 ```bash
 systemctl is-active ssh ufw fail2ban
-sudo devworks status
+sudo dw status
 ```
 
 Cek SSH dari Windows host:

@@ -21,17 +21,18 @@ Default installation policy:
 
 ## Feature Activation
 
-Use `devworks` after first login:
+Use `dw` after first login. The long command `devworks` remains available as
+the canonical name, while `dw` is the short administrator command.
 
 ```bash
-sudo devworks status
-sudo devworks templates
+sudo dw status
+sudo dw templates
 ```
 
 Enable a public web/TLS stack only after DNS points to the server:
 
 ```bash
-sudo devworks enable web \
+sudo dw enable web \
   --domain example.com \
   --tls certbot \
   --email admin@example.com \
@@ -41,7 +42,7 @@ sudo devworks enable web \
 Enable a local AI runtime only when the server has enough resources:
 
 ```bash
-sudo devworks enable ai \
+sudo dw enable ai \
   --runtime ollama \
   --bind 127.0.0.1 \
   --memory-max 8G \
@@ -51,13 +52,13 @@ sudo devworks enable ai \
 Install Podman without enabling a daemon:
 
 ```bash
-sudo devworks enable container podman
+sudo dw enable container podman
 ```
 
 Enable Docker only when a daemon-based container runtime is required:
 
 ```bash
-sudo devworks enable container docker
+sudo dw enable container docker
 ```
 
 ## Public Server Checklist
@@ -68,7 +69,7 @@ Before publishing a server to the internet:
 - Use SSH keys and keep SSH password authentication disabled.
 - Confirm `sudo ufw status verbose` opens only required ports.
 - Confirm `systemctl --failed` is empty.
-- Confirm `sudo devworks status` matches the intended workload profile.
+- Confirm `sudo dw status` matches the intended workload profile.
 - Issue TLS certificates after DNS is correct.
 - Configure off-server backup and test restore.
 - Apply resource limits to AI and heavy background jobs.

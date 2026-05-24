@@ -17,7 +17,7 @@ Devworks Server OS ditujukan untuk admin server yang ingin menjalankan:
 - Basis OS memakai Debian Stable agar stabil dan mudah diaudit.
 - Sistem tetap sederhana, tidak membuat kernel baru dari nol.
 - Workload aplikasi disarankan berjalan sebagai systemd service atau container.
-- Workload web, AI, container daemon, dan port publik tidak aktif otomatis; administrator mengaktifkannya melalui `devworks`.
+- Workload web, AI, container daemon, dan port publik tidak aktif otomatis; administrator mengaktifkannya melalui `dw` atau nama panjang `devworks`.
 - GUI dipakai untuk administrasi dan monitoring, bukan sebagai lapisan wajib untuk menjalankan server.
 - Konfigurasi penting tetap berbasis file teks dan systemd.
 - Operasi destructive wajib memakai konfirmasi manual pada ISO standar.
@@ -41,7 +41,7 @@ Devworks Server OS ditujukan untuk admin server yang ingin menjalankan:
 | Time sync | Chrony |
 | Security updates | unattended-upgrades |
 | Installer | Devworks permanent disk installer |
-| Feature manager | `devworks` CLI |
+| Feature manager | `dw` / `devworks` CLI |
 
 ## UI/UX
 
@@ -78,9 +78,9 @@ Setelah instalasi production, OS hanya menyiapkan platform:
 Aktivasi dilakukan secara eksplisit:
 
 ```bash
-sudo devworks enable web --domain example.com --tls certbot --email admin@example.com --open-firewall
-sudo devworks enable ai --runtime ollama --bind 127.0.0.1
-sudo devworks enable container podman
+sudo dw enable web --domain example.com --tls certbot --email admin@example.com --open-firewall
+sudo dw enable ai --runtime ollama --bind 127.0.0.1
+sudo dw enable container podman
 ```
 
 ## Installer

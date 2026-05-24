@@ -25,6 +25,7 @@ mkdir -p "${INSTALL_ROOT}/etc/devworks/templates" "${INSTALL_ROOT}/usr/local/sbi
 
 if [[ -f "${PROJECT_DIR}/scripts/devworks" ]]; then
   install -D -m 0755 "${PROJECT_DIR}/scripts/devworks" "${INSTALL_ROOT}/usr/local/sbin/devworks"
+  ln -sfn devworks "${INSTALL_ROOT}/usr/local/sbin/dw"
 else
   log_warn "scripts/devworks missing; feature manager will not be installed."
 fi
@@ -105,13 +106,13 @@ daemons automatically. Enable only what the server actually needs.
 Useful commands:
 
 ```bash
-sudo devworks status
-sudo devworks templates
-sudo devworks enable web --domain example.com --tls certbot --email admin@example.com --open-firewall
-sudo devworks enable ai --runtime ollama --bind 127.0.0.1 --memory-max 8G --cpu-quota 300%
-sudo devworks enable container podman
-sudo devworks disable ai
-sudo devworks disable web --close-firewall
+sudo dw status
+sudo dw templates
+sudo dw enable web --domain example.com --tls certbot --email admin@example.com --open-firewall
+sudo dw enable ai --runtime ollama --bind 127.0.0.1 --memory-max 8G --cpu-quota 300%
+sudo dw enable container podman
+sudo dw disable ai
+sudo dw disable web --close-firewall
 ```
 EOF
 

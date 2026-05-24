@@ -45,7 +45,7 @@ case "${TLS_MODE}" in
     ;;
   certbot)
     apt_install_target certbot python3-certbot-nginx
-    log_warn "Certbot installed. Certificate issuance remains opt-in via: sudo devworks enable web --tls certbot ..."
+    log_warn "Certbot installed. Certificate issuance remains opt-in via: sudo dw enable web --tls certbot ..."
     ;;
   off)
     log_info "TLS_MODE=off; no certificate is generated during installation."
@@ -60,11 +60,11 @@ Devworks Server OS does not publish HTTPS automatically.
 
 After DNS points to this server, enable web/TLS explicitly, for example:
 
-  sudo devworks enable web --domain example.com --tls certbot --email admin@example.com --open-firewall
+  sudo dw enable web --domain example.com --tls certbot --email admin@example.com --open-firewall
 
 For a local self-signed test:
 
-  sudo devworks enable web --domain devworks.local --tls self-signed
+  sudo dw enable web --domain devworks.local --tls self-signed
 EOF
 
 log_info "Firewall configured. Public web ports remain closed unless explicitly allowed."

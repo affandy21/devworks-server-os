@@ -14,7 +14,7 @@ Komponen utama:
 - Devworks Control Center sebagai aplikasi native GTK, bukan browser atau webview.
 - Installer permanen ke disk.
 - SSH, UFW, Fail2ban, tooling Nginx opt-in, dan update keamanan otomatis.
-- Dukungan service web dan AI tersedia sebagai fitur opt-in melalui `devworks`, bukan auto-start bawaan.
+- Dukungan service web dan AI tersedia sebagai fitur opt-in melalui `dw`/`devworks`, bukan auto-start bawaan.
 
 ## 2. Status Build Saat Ini
 
@@ -50,7 +50,7 @@ Checksum build terakhir:
 
 ```text
 devworks-server-os.iso
-SHA256: 0c1421f91d8858284afb0de5a2b52ca6ec473c4662c528b91d0a779c56c3d1ec
+SHA256: a5e5c8d4b9d51ccccc9296027b93ac9e4bb207ab6c5aca718ccb0c65dcbe5d79
 
 devworks-server-os-autoinstall.iso
 SHA256: d31a48c842c81ca9f313e4d4a06d0e02081db24554cea915776678175addb921
@@ -276,11 +276,11 @@ Service web dan AI dapat ditambahkan sebagai unit systemd atau container dengan 
 Devworks Server OS tidak menjalankan workload publik secara otomatis. Gunakan:
 
 ```bash
-sudo devworks status
-sudo devworks templates
-sudo devworks enable web --domain example.com --tls certbot --email admin@example.com --open-firewall
-sudo devworks enable ai --runtime ollama --bind 127.0.0.1 --memory-max 8G --cpu-quota 300%
-sudo devworks enable container podman
+sudo dw status
+sudo dw templates
+sudo dw enable web --domain example.com --tls certbot --email admin@example.com --open-firewall
+sudo dw enable ai --runtime ollama --bind 127.0.0.1 --memory-max 8G --cpu-quota 300%
+sudo dw enable container podman
 ```
 
 Contoh Docker service policy:
@@ -345,7 +345,7 @@ Rekomendasi:
 Aktivasi TLS production:
 
 ```bash
-sudo devworks enable web --domain DOMAIN_ANDA --tls certbot --email admin@example.com --open-firewall
+sudo dw enable web --domain DOMAIN_ANDA --tls certbot --email admin@example.com --open-firewall
 sudo nginx -t
 sudo systemctl status nginx --no-pager
 curl -I https://DOMAIN_ANDA
@@ -365,7 +365,7 @@ sudo ufw enable
 sudo ufw status verbose
 ```
 
-Port web dibuka oleh `sudo devworks enable web ... --open-firewall` setelah admin memilih domain dan TLS.
+Port web dibuka oleh `sudo dw enable web ... --open-firewall` setelah admin memilih domain dan TLS.
 
 Fail2ban digunakan untuk mengurangi brute force SSH.
 
@@ -429,7 +429,7 @@ systemctl --failed
 sudo ufw status verbose
 sudo systemctl status ssh --no-pager
 sudo systemctl status fail2ban --no-pager
-sudo devworks status
+sudo dw status
 ```
 
 Uji akses SSH:
@@ -441,7 +441,7 @@ ssh devworks@IP_SERVER
 Uji HTTP hanya setelah web diaktifkan:
 
 ```bash
-sudo devworks enable web --domain IP_SERVER --tls off --open-firewall
+sudo dw enable web --domain IP_SERVER --tls off --open-firewall
 curl -I http://IP_SERVER
 ```
 
@@ -470,7 +470,7 @@ Command validasi di guest:
 ```bash
 systemctl --failed
 systemctl is-active ssh ufw fail2ban
-sudo devworks status
+sudo dw status
 ```
 
 ## 20. Prosedur Uji Disk Kosong

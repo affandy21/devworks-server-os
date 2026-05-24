@@ -61,7 +61,7 @@ Dokumen pendukung:
 - Devworks Control Center berjalan sebagai aplikasi native.
 - Monitoring realtime tersedia untuk CPU, memori, disk, jaringan, dan service sistem.
 - Default install tidak menjalankan workload web, AI, container daemon, atau port publik sebelum user mengaktifkannya.
-- Command `devworks` menyediakan fitur opt-in untuk web, TLS, AI runtime, container, dan template service.
+- Command `dw` menyediakan fitur opt-in untuk web, TLS, AI runtime, container, dan template service. Nama panjang `devworks` tetap tersedia.
 - Installer menggunakan konfirmasi disk manual untuk mengurangi risiko salah memilih disk.
 - Installer permanen meminta username/password admin dan dapat memasang SSH key seperti OS server umum.
 - Instalasi dual-boot otomatis belum didukung. Mode installer saat ini adalah `erase-disk`.
@@ -70,11 +70,11 @@ Dokumen pendukung:
 ## Aktivasi Fitur Setelah Install
 
 ```bash
-sudo devworks status
-sudo devworks templates
-sudo devworks enable web --domain example.com --tls certbot --email admin@example.com --open-firewall
-sudo devworks enable ai --runtime ollama --bind 127.0.0.1 --memory-max 8G --cpu-quota 300%
-sudo devworks enable container podman
+sudo dw status
+sudo dw templates
+sudo dw enable web --domain example.com --tls certbot --email admin@example.com --open-firewall
+sudo dw enable ai --runtime ollama --bind 127.0.0.1 --memory-max 8G --cpu-quota 300%
+sudo dw enable container podman
 ```
   
 ## File ISO
@@ -88,7 +88,7 @@ Checksum build terakhir:
 
 ```text
 devworks-server-os.iso
-SHA256: 0c1421f91d8858284afb0de5a2b52ca6ec473c4662c528b91d0a779c56c3d1ec
+SHA256: a5e5c8d4b9d51ccccc9296027b93ac9e4bb207ab6c5aca718ccb0c65dcbe5d79
 
 devworks-server-os-autoinstall.iso
 SHA256: d31a48c842c81ca9f313e4d4a06d0e02081db24554cea915776678175addb921
