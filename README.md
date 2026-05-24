@@ -13,9 +13,9 @@ Build saat ini telah mencakup ISO bootable, desktop GUI ringan, Devworks Control
 
 ## Preview
 
-![Devworks Server OS desktop](docs/assets/screenshots/desktop.png)
+![Devworks Server OS boot menu](docs/assets/screenshots/boot-menu.png)
 
-![Devworks Control Center](docs/assets/screenshots/control-center.png)
+![Devworks Server OS desktop](docs/assets/screenshots/desktop.png)
 
 ## Download
 
@@ -75,7 +75,7 @@ Checksum build terakhir:
 
 ```text
 devworks-server-os.iso
-SHA256: f4ebde934a5da0391b8f82f11a3682ed785e76435085a9e19dacc381b167b7e5
+SHA256: 7c8a48cac05609b2ca16a9232159854b8a3c3f9ce16352b088ad473dbf284119
 
 devworks-server-os-autoinstall.iso
 SHA256: d31a48c842c81ca9f313e4d4a06d0e02081db24554cea915776678175addb921
