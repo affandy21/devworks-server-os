@@ -6,6 +6,8 @@ param(
 
   [switch]$RemoveDesktopLogo,
 
+  [switch]$AddHeaderText,
+
   [int]$Width = 640,
   [int]$Height = 480
 )
@@ -110,6 +112,44 @@ function Remove-CenteredDesktopLogo {
   }
 }
 
+function Draw-HeaderText {
+  param(
+    [System.Drawing.Graphics]$TargetGraphics,
+    [int]$TargetWidth,
+    [int]$TargetHeight
+  )
+
+  $textX = [Math]::Round($TargetWidth * 0.32)
+  $titleY = [Math]::Round($TargetHeight * 0.13)
+  $titleSize = [Math]::Max(28, [Math]::Round($TargetWidth * 0.047))
+  $subSize = [Math]::Max(16, [Math]::Round($TargetWidth * 0.025))
+  $lineSize = [Math]::Max(14, [Math]::Round($TargetWidth * 0.021))
+
+  $fontTitle = New-Object System.Drawing.Font "Segoe UI", $titleSize, ([System.Drawing.FontStyle]::Bold), ([System.Drawing.GraphicsUnit]::Pixel)
+  $fontSub = New-Object System.Drawing.Font "Segoe UI", $subSize, ([System.Drawing.FontStyle]::Regular), ([System.Drawing.GraphicsUnit]::Pixel)
+  $fontLine = New-Object System.Drawing.Font "Segoe UI", $lineSize, ([System.Drawing.FontStyle]::Regular), ([System.Drawing.GraphicsUnit]::Pixel)
+
+  $shadowBrush = New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::FromArgb(190, 0, 0, 0))
+  $whiteBrush = New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::FromArgb(248, 250, 255, 255))
+  $cyanBrush = New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::FromArgb(255, 101, 255, 247))
+
+  try {
+    $TargetGraphics.DrawString("Devworks Server OS", $fontTitle, $shadowBrush, $textX + 2, $titleY + 2)
+    $TargetGraphics.DrawString("Devworks Server OS", $fontTitle, $whiteBrush, $textX, $titleY)
+    $TargetGraphics.DrawString("v0.1.1 Server Hardening", $fontSub, $shadowBrush, $textX + 1, $titleY + [Math]::Round($titleSize * 1.25) + 1)
+    $TargetGraphics.DrawString("v0.1.1 Server Hardening", $fontSub, $cyanBrush, $textX, $titleY + [Math]::Round($titleSize * 1.25))
+    $TargetGraphics.DrawString("Installer permanen | GUI native | monitoring server", $fontLine, $shadowBrush, $textX + 1, $titleY + [Math]::Round($titleSize * 2.05) + 1)
+    $TargetGraphics.DrawString("Installer permanen | GUI native | monitoring server", $fontLine, $whiteBrush, $textX, $titleY + [Math]::Round($titleSize * 2.05))
+  } finally {
+    $shadowBrush.Dispose()
+    $whiteBrush.Dispose()
+    $cyanBrush.Dispose()
+    $fontTitle.Dispose()
+    $fontSub.Dispose()
+    $fontLine.Dispose()
+  }
+}
+
 try {
   $rect = New-Object System.Drawing.Rectangle 0, 0, $Width, $Height
 
@@ -127,6 +167,10 @@ try {
     )
     $graphics.FillRectangle($bg, $rect)
     $bg.Dispose()
+  }
+
+  if ($AddHeaderText) {
+    Draw-HeaderText -TargetGraphics $graphics -TargetWidth $Width -TargetHeight $Height
   }
 
   $bitmap.Save($OutputPath, [System.Drawing.Imaging.ImageFormat]::Png)
