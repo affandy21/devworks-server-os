@@ -9,5 +9,8 @@ lb config noauto \
   --debian-installer live \
   --security false \
   --apt-indices false \
+  --iso-application "Devworks Server OS" \
+  --iso-publisher "Devworks Server OS project; https://github.com/affandy21/devworks-server-os" \
+  --iso-volume "Devworks Server OS 0.1.1" \
   --bootappend-live "boot=live components hostname=devworks-server username=devworks user-fullname=Devworks" \
   "${@}"

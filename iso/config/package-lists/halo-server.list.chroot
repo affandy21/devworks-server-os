@@ -29,9 +29,6 @@ dosfstools
 e2fsprogs
 util-linux
 udev
-grub-pc-bin
-grub-pc
-grub-efi-amd64
 grub-efi-amd64-bin
 shim-signed
 efibootmgr

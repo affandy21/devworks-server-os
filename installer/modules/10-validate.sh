@@ -20,6 +20,15 @@ chroot_run sshd -t
 chroot_run nginx -t
 chroot_run systemctl is-enabled ssh
 chroot_run systemctl is-enabled nginx
+chroot_run test -f /etc/sysctl.d/98-devworks-production-hardening.conf
+
+if [[ "${SSH_PASSWORD_AUTH:-yes}" == "no" ]]; then
+  chroot_run grep -R "^PasswordAuthentication no" /etc/ssh/sshd_config.d
+fi
+
+if [[ "${ENABLE_AUTOLOGIN:-no}" == "no" ]]; then
+  chroot_run test ! -f /etc/lightdm/lightdm.conf.d/50-devworks-autologin.conf
+fi
 
 if is_yes "${ENABLE_UFW:-yes}"; then
   chroot_run ufw status verbose || true

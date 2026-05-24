@@ -65,3 +65,40 @@ GPG fingerprint:
 - Hardening SSH production.
 - Repository update internal.
 - Source request email khusus untuk release production.
+
+## v0.1.1-server-hardening
+
+Release ini menambahkan hardening untuk server kosong yang akan dipakai lebih serius.
+
+### Added
+
+- Profil installer `installer/profiles/production-server.env`.
+- Expire admin password on first login.
+- SSH empty password hardening.
+- Reduced SSH max authentication tries.
+- Admin web UI local-only binding via `ADMIN_WEB_UI_BIND=127.0.0.1`.
+- Sysctl production hardening profile.
+- Production validation checks.
+- Server backup/restore documentation.
+
+### Changed
+
+- Bare-metal profile now forces first-login password change.
+- Bare-metal admin web UI now binds to localhost by default.
+- README documents the production hardening profile.
+
+### Backup Artifact
+
+Local backup created:
+
+```text
+C:\root\backups\devworks-server-backup-20260524-040912.tar.gz
+C:\root\backups\devworks-server-backup-20260524-040912.tar.gz.sha256
+```
+
+### Remaining Production Requirements
+
+- Replace default password hash before real deployment.
+- Provide SSH authorized keys before disabling SSH password login.
+- Provide real TLS certificate files or switch to certbot after DNS is ready.
+- Validate restore of each web/AI project from backup.

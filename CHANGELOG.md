@@ -28,3 +28,19 @@ All notable changes to Devworks Server OS are documented here.
 - The current installer mode is erase-disk.
 - Physical server installation still requires hardware validation and backup planning.
 
+## v0.1.1-server-hardening - 2026-05-24
+
+### Added
+
+- Production server installer profile.
+- First-login admin password expiration.
+- SSH hardening controls.
+- Local-only admin web UI binding.
+- Kernel/network sysctl hardening.
+- Server backup and restore documentation.
+- Backup archive for `C:\root\server`.
+
+### Changed
+
+- Bare-metal profile now defaults closer to production safety.
+- Validation now checks production hardening files and disabled autologin.

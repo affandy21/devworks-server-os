@@ -12,17 +12,20 @@ COPY . /build/
 
 RUN chmod +x /build/scripts/build-iso.sh \
     && chmod +x /build/iso/auto/config \
-    && find /build/iso/config/hooks/normal -maxdepth 1 -type f -name '*.chroot' -exec chmod +x {} +
+    && if [ -d /build/iso/config/hooks/normal ]; then find /build/iso/config/hooks/normal -maxdepth 1 -type f -name '*.chroot' -exec chmod +x {} +; fi
 
 CMD ["/bin/bash", "-c", "\
+    set -euo pipefail && \
+    SRC=/build && OUT=/build && \
+    if [ -d /work ] && [ -f /work/scripts/build-iso.sh ]; then SRC=/work; OUT=/work; fi && \
     echo '[*] Copying to tmpfs for build...' && \
-    mkdir -p /tmp/build && \
-    cp -r /build/* /tmp/build/ && \
+    rm -rf /tmp/build && mkdir -p /tmp/build && \
+    cp -a \"${SRC}\"/. /tmp/build/ && \
     cd /tmp/build && \
     echo '[*] Running build...' && \
     bash scripts/build-iso.sh && \
     echo '[*] Copying result back...' && \
-    mkdir -p /build/dist && \
-    cp /tmp/build/dist/* /build/dist/ 2>/dev/null || true && \
-    echo '[✓] Build complete!'\
+    mkdir -p \"${OUT}/dist\" && \
+    cp -f /tmp/build/dist/* \"${OUT}/dist/\" && \
+    echo '[ok] Build complete!'\
 "]

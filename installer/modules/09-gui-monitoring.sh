@@ -3,6 +3,7 @@
 : "${ENABLE_GUI:=yes}"
 : "${ENABLE_NATIVE_MONITOR:=yes}"
 : "${ENABLE_ADMIN_WEB_UI:=yes}"
+: "${ADMIN_WEB_UI_BIND:=127.0.0.1}"
 : "${WALLPAPER_SOURCE:=/usr/share/backgrounds/halo/devworks-wallpaper.png}"
 
 if ! is_yes "${ENABLE_GUI}"; then
@@ -123,7 +124,7 @@ Wants=network-online.target
 [Service]
 Type=simple
 WorkingDirectory=/opt/devworks/admin-ui
-Environment=DEVWORKS_HOST=0.0.0.0
+Environment=DEVWORKS_HOST=${ADMIN_WEB_UI_BIND}
 Environment=DEVWORKS_PORT=8088
 Environment=DEVWORKS_ENABLE_INSTALL=0
 ExecStart=/usr/bin/python3 /opt/devworks/admin-ui/server.py
