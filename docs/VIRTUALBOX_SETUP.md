@@ -72,13 +72,13 @@ Langkah:
 
 1. Boot ISO.
 2. Buka terminal.
-3. Jalankan installer permanen:
+3. Jalankan wizard installer sederhana:
 
 ```bash
-sudo /opt/devworks/installer/install-devworks-os.sh
+sudo devworks-installer
 ```
 
-4. Baca daftar disk.
+4. Baca daftar disk dan ringkasan setting.
 5. Pilih disk virtual target.
 6. Ketik konfirmasi sesuai instruksi, misalnya:
 

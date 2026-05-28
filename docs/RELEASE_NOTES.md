@@ -168,6 +168,7 @@ Release line ini menambahkan instalasi berdampingan dengan Windows secara manual
 
 - Mode installer `manual-partition` untuk dual boot UEFI.
 - Profil `installer/profiles/dualboot-manual.env`.
+- Wizard installer sederhana melalui `sudo devworks-installer` untuk instalasi disk kosong yang menampilkan target disk dan ringkasan setting sebelum erase.
 - Guard yang melarang format EFI di mode dual boot.
 - Konfirmasi partisi eksplisit sebelum root Linux diformat.
 - Backup tabel partisi GPT sebelum instalasi dual boot.

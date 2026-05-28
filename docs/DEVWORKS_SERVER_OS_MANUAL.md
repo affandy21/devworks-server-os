@@ -147,11 +147,13 @@ Rekomendasi setelah instalasi production:
 
 ## 7. Instalasi Permanen Ke Disk
 
-Installer permanen tersedia melalui skrip:
+Installer permanen tersedia melalui wizard sederhana:
 
-```text
-/opt/devworks/installer/install-devworks-os.sh
+```bash
+sudo devworks-installer
 ```
+
+Wizard ini menampilkan disk target, isi partisi, hostname, user admin, status SSH, dan ringkasan bahwa web/AI/container belum diaktifkan. Untuk mode advanced, installer penuh tetap tersedia di `/opt/devworks/installer/devworks-install.sh`.
 
 Mode installer untuk disk kosong:
 
@@ -173,7 +175,7 @@ Alur aman ISO standar:
 
 1. Boot ISO di VirtualBox atau PC target.
 2. Login sebagai user default jika diperlukan.
-3. Jalankan installer permanen.
+3. Jalankan `sudo devworks-installer`.
 4. Installer menampilkan daftar disk.
 5. Pilih disk target.
 6. Ketik konfirmasi sesuai instruksi, misalnya:

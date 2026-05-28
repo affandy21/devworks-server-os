@@ -20,6 +20,8 @@ install -D -m 0755 "${PROJECT_DIR}/scripts/devworks" \
   "${ISO_DIR}/config/includes.chroot/opt/devworks/scripts/devworks"
 find "${ISO_DIR}/config/includes.chroot/opt/devworks/installer" -type f -name '*.sh' -exec chmod +x {} +
 chmod +x "${ISO_DIR}/config/includes.chroot/opt/devworks/installer/devworks-install.sh"
+chmod +x "${ISO_DIR}/config/includes.chroot/usr/local/sbin/devworks-installer"
+chmod +x "${ISO_DIR}/config/includes.chroot/usr/local/sbin/install-devworks-os"
 install -D -m 0644 "${PROJECT_DIR}/services/devworks-admin-ui.service" \
   "${ISO_DIR}/config/includes.chroot/etc/systemd/system/devworks-admin-ui.service"
 chmod +x "${ISO_DIR}/auto/config"

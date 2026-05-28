@@ -6,6 +6,17 @@ manual-partition mode for installing alongside an existing Windows system.
 
 ## Quick Start
 
+From the live desktop or live terminal:
+
+```bash
+sudo devworks-installer
+```
+
+The wizard asks for the target disk, hostname, admin username, and first SSH
+policy. It writes a temporary config and then calls the full installer.
+
+For advanced installs, copy and edit a config manually:
+
 ```bash
 cp installer/config.env.example installer/config.env
 nano installer/config.env

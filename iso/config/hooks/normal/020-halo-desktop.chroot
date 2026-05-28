@@ -4,6 +4,10 @@ set -euo pipefail
 chmod +x /usr/local/bin/devworks-open-admin
 chmod +x /usr/local/bin/devworks-trust-launchers
 chmod +x /opt/devworks/control-center/devworks-control-center
+chmod +x /opt/devworks/installer/devworks-installer-wizard.sh
+chmod +x /opt/devworks/installer/install-devworks-os.sh
+chmod +x /usr/local/sbin/devworks-installer
+chmod +x /usr/local/sbin/install-devworks-os
 rm -f /etc/xdg/autostart/devworks-admin.desktop
 mkdir -p /etc/skel/Desktop /usr/share/applications
 if [ -f /etc/skel/Desktop/devworks-admin.desktop ]; then

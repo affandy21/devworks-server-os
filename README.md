@@ -164,7 +164,13 @@ Untuk VirtualBox atau PC server kosong, gunakan ISO standar:
 dist/devworks-server-os.iso
 ```
 
-Installer akan menampilkan daftar disk dan meminta konfirmasi manual seperti:
+Di sesi live, jalankan wizard sederhana:
+
+```bash
+sudo devworks-installer
+```
+
+Wizard akan menampilkan disk target, partisi yang ada, hostname, user admin, status SSH, dan memastikan web/AI/container tetap tidak aktif setelah install awal. Installer tetap meminta konfirmasi manual seperti:
 
 ```text
 ERASE /dev/sda
