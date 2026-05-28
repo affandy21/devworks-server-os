@@ -32,4 +32,7 @@ validate_hostname "server01"
 ! validate_hostname "devworks server"
 ! validate_hostname "devworks-server-"
 
+grep -Fq 'DEVWORKS_ALLOW_INSTALL_ON_MOUNTED_DISK="yes"' "${WIZARD}"
+grep -Fq 'Partisi mounted:    akan dilepas otomatis pada disk target setelah konfirmasi' "${WIZARD}"
+
 echo "Wizard prompt static checks passed."

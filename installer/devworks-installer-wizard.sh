@@ -181,7 +181,7 @@ write_config() {
 # Config ini memasang base desktop/server bersih lebih dulu.
 DEVWORKS_I_UNDERSTAND_THIS_ERASES_DISK="yes"
 DEVWORKS_MANUAL_CONFIRM_DISK="no"
-DEVWORKS_ALLOW_INSTALL_ON_MOUNTED_DISK="no"
+DEVWORKS_ALLOW_INSTALL_ON_MOUNTED_DISK="yes"
 INSTALL_MODE="erase-disk"
 TARGET_DISK="$(quote_value "${TARGET_DISK}")"
 TARGET_BOOT_MODE="auto"
@@ -314,6 +314,7 @@ Login SSH password: ${ssh_password_auth}
 Service web:        nonaktif sampai user mengaktifkan
 Service AI:         nonaktif sampai user mengaktifkan
 Container runtime:  nonaktif sampai user mengaktifkan
+Partisi mounted:    akan dilepas otomatis pada disk target setelah konfirmasi
 File config:        ${CONFIG_OUT}
 
 EOF
