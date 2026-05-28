@@ -33,7 +33,7 @@ prompt_default() {
   local prompt="$1"
   local default="$2"
   local answer=""
-  printf '%s [%s]: ' "${prompt}" "${default}"
+  printf '%s [%s]: ' "${prompt}" "${default}" >&2
   read -r answer
   printf '%s' "${answer:-${default}}"
 }
