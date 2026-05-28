@@ -4,6 +4,7 @@
 : "${GRUB_TIMEOUT:=5}"
 : "${GRUB_CMDLINE_LINUX_DEFAULT:=quiet}"
 : "${ENABLE_GRUB_RECOVERY:=yes}"
+: "${ENABLE_WINDOWS_BOOT_DETECTION:=yes}"
 
 [[ -f "${STATE_DIR}/disk.env" ]] || die "disk.env missing. Run disk module first."
 # shellcheck source=/dev/null
@@ -20,6 +21,7 @@ GRUB_DISTRIBUTOR="Devworks Server OS"
 GRUB_CMDLINE_LINUX_DEFAULT="${GRUB_CMDLINE_LINUX_DEFAULT}"
 GRUB_CMDLINE_LINUX=""
 GRUB_DISABLE_RECOVERY=false
+GRUB_DISABLE_OS_PROBER=false
 EOF
 
 boot_mode="${TARGET_BOOT_MODE}"
@@ -34,6 +36,7 @@ fi
 case "${boot_mode}" in
   efi)
     chroot_run grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=Devworks --recheck
+    chroot_run grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=Devworks --recheck --no-nvram --removable
     ;;
   bios)
     chroot_run grub-install --target=i386-pc "${TARGET_DISK}"
@@ -42,6 +45,26 @@ case "${boot_mode}" in
     die "Unsupported TARGET_BOOT_MODE: ${TARGET_BOOT_MODE}"
     ;;
 esac
+
+if is_yes "${ENABLE_WINDOWS_BOOT_DETECTION}" &&
+   [[ "${boot_mode}" == "efi" ]] &&
+   [[ -f "${INSTALL_ROOT}/boot/efi/EFI/Microsoft/Boot/bootmgfw.efi" ]]; then
+  cat > "${INSTALL_ROOT}/etc/grub.d/42_devworks_windows" <<EOF
+#!/bin/sh
+cat <<'GRUB_ENTRY'
+menuentry 'Windows Boot Manager' --class windows --class os {
+  insmod part_gpt
+  insmod fat
+  search --no-floppy --fs-uuid --set=esp ${EFI_UUID}
+  chainloader (\${esp})/EFI/Microsoft/Boot/bootmgfw.efi
+}
+GRUB_ENTRY
+EOF
+  chmod 0755 "${INSTALL_ROOT}/etc/grub.d/42_devworks_windows"
+  log_info "Microsoft EFI loader detected; adding Windows Boot Manager entry to GRUB."
+else
+  rm -f "${INSTALL_ROOT}/etc/grub.d/42_devworks_windows"
+fi
 
 chroot_run update-initramfs -u -k all
 chroot_run update-grub

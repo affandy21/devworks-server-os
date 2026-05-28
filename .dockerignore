@@ -13,6 +13,8 @@ iso/config/hooks/normal/*
 *.jpg
 *.jpeg
 *.webp
+!iso/config/includes.binary/**/*.png
+!iso/config/includes.chroot/**/*.png
 *.log
 __pycache__
 *.pyc

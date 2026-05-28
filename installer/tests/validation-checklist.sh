@@ -30,7 +30,9 @@ check "ufw status" ufw status verbose
 check "no failed units" bash -c 'test "$(systemctl --failed --no-legend | wc -l)" -eq 0'
 check "ssh port listening" bash -c "ss -tln | grep -q ':${SSH_PORT} '"
 check "devworks feature manager" test -x /usr/local/sbin/devworks
-check "dw short command" test -L /usr/local/sbin/dw
+check "dw short command in sbin" test -L /usr/local/sbin/dw
+check "devworks command in user path" test -x /usr/local/bin/devworks
+check "dw short command in user path" test -x /usr/local/bin/dw
 
 if [[ "${EXPECT_WEB}" == "yes" ]]; then
   check "nginx active" systemctl is-active --quiet nginx

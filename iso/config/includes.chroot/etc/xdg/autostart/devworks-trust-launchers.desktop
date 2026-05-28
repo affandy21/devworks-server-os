@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Prepare Devworks Desktop Launchers
+Comment=Trust locally installed Devworks launcher files once
+Exec=/usr/local/bin/devworks-trust-launchers
+OnlyShowIn=XFCE;
+NoDisplay=true
+Terminal=false
+X-GNOME-Autostart-enabled=true

@@ -21,11 +21,13 @@
 
 log_info "Installing Devworks feature manager and opt-in service templates"
 
-mkdir -p "${INSTALL_ROOT}/etc/devworks/templates" "${INSTALL_ROOT}/usr/local/sbin"
+mkdir -p "${INSTALL_ROOT}/etc/devworks/templates" "${INSTALL_ROOT}/usr/local/sbin" "${INSTALL_ROOT}/usr/local/bin"
 
 if [[ -f "${PROJECT_DIR}/scripts/devworks" ]]; then
   install -D -m 0755 "${PROJECT_DIR}/scripts/devworks" "${INSTALL_ROOT}/usr/local/sbin/devworks"
   ln -sfn devworks "${INSTALL_ROOT}/usr/local/sbin/dw"
+  ln -sfn ../sbin/devworks "${INSTALL_ROOT}/usr/local/bin/devworks"
+  ln -sfn ../sbin/devworks "${INSTALL_ROOT}/usr/local/bin/dw"
 else
   log_warn "scripts/devworks missing; feature manager will not be installed."
 fi

@@ -74,7 +74,13 @@ devworks-server-os-package-manifest.tsv
 devworks-server-os-package-manifest.tsv.sha256
 ```
 
-A manifest can also be generated from an installed system:
+A release manifest is generated from the final ISO image:
+
+```bash
+bash scripts/generate-iso-package-manifest.sh dist/devworks-server-os.iso dist/devworks-server-os-package-manifest.tsv
+```
+
+A machine-specific manifest can also be generated from an installed system:
 
 ```bash
 dpkg-query -W -f='${binary:Package}\t${Version}\t${Architecture}\n' > devworks-package-manifest.tsv

@@ -6,9 +6,12 @@ require_cmd mount
 : "${DEBIAN_RELEASE:=bookworm}"
 : "${DEBIAN_MIRROR:=http://deb.debian.org/debian}"
 : "${DEBIAN_SECURITY_MIRROR:=http://security.debian.org/debian-security}"
-: "${APT_COMPONENTS:=main contrib non-free-firmware}"
+: "${APT_COMPONENTS:=main contrib non-free non-free-firmware}"
+: "${ENABLE_HARDWARE_BACKPORTS:=no}"
 : "${DEVWORKS_HOSTNAME:=devworks-server}"
 : "${DEVWORKS_PRETTY_NAME:=Devworks Server OS}"
+: "${DEVWORKS_VERSION:=0.2.1}"
+: "${DEVWORKS_VERSION_NAME:=Dual Boot Hardware}"
 : "${TIMEZONE:=Asia/Jakarta}"
 : "${LOCALE:=en_US.UTF-8}"
 : "${KEYMAP:=us}"
@@ -48,11 +51,27 @@ EOF
 
 chroot_run apt-get update
 apt_install_target \
-  linux-image-amd64 firmware-linux-free systemd-sysv dbus \
+  linux-image-amd64 linux-headers-amd64 firmware-linux-free firmware-linux \
+  firmware-linux-nonfree firmware-amd-graphics firmware-misc-nonfree firmware-nvidia-gsp \
+  intel-microcode amd64-microcode dkms mesa-va-drivers intel-media-va-driver \
+  systemd-sysv dbus \
   ca-certificates curl wget gnupg lsb-release apt-transport-https \
   sudo vim nano less jq rsync git openssh-server \
   locales console-setup keyboard-configuration tzdata \
-  chrony ufw fail2ban python3-systemd logrotate htop tmux sysstat smartmontools dosfstools
+  chrony ufw fail2ban python3-systemd logrotate htop tmux sysstat smartmontools dosfstools os-prober
+
+if is_yes "${ENABLE_HARDWARE_BACKPORTS}"; then
+  cat > "${INSTALL_ROOT}/etc/apt/sources.list.d/devworks-hardware-backports.list" <<EOF
+deb ${DEBIAN_MIRROR} ${DEBIAN_RELEASE}-backports ${APT_COMPONENTS}
+EOF
+  chroot_run apt-get update
+  chroot_run apt-get install -y --no-install-recommends -t "${DEBIAN_RELEASE}-backports" \
+    linux-image-amd64 linux-headers-amd64 firmware-linux firmware-linux-nonfree \
+    firmware-amd-graphics firmware-misc-nonfree
+  log_info "Hardware backports enabled for newer graphics and platform support."
+else
+  log_info "Hardware backports disabled; enable explicitly for newer Intel Arc/AMD hardware when required."
+fi
 
 base_boot_mode="${TARGET_BOOT_MODE:-auto}"
 if [[ "${base_boot_mode}" == "auto" ]]; then
@@ -90,13 +109,13 @@ echo "XKBLAYOUT=\"${KEYMAP}\"" > "${INSTALL_ROOT}/etc/default/keyboard"
 cat > "${INSTALL_ROOT}/etc/os-release" <<EOF
 PRETTY_NAME="${DEVWORKS_PRETTY_NAME}"
 NAME="Devworks Server OS"
-VERSION_ID="1.0"
-VERSION="1.0"
+VERSION_ID="${DEVWORKS_VERSION}"
+VERSION="${DEVWORKS_VERSION} ${DEVWORKS_VERSION_NAME}"
 ID=devworks
 ID_LIKE=debian
-HOME_URL="https://devworks.local"
-SUPPORT_URL="https://devworks.local"
-BUG_REPORT_URL="https://devworks.local"
+HOME_URL="https://github.com/affandy21/devworks-server-os"
+SUPPORT_URL="https://github.com/affandy21/devworks-server-os/issues"
+BUG_REPORT_URL="https://github.com/affandy21/devworks-server-os/issues"
 EOF
 
 cat > "${INSTALL_ROOT}/etc/issue" <<EOF

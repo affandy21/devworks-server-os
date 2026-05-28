@@ -13,6 +13,7 @@ usage() {
 Usage:
   sudo bash installer/devworks-install.sh --config installer/config.env
   sudo bash installer/devworks-install.sh --config installer/profiles/virtualbox.env
+  sudo bash installer/devworks-install.sh --config installer/profiles/dualboot-manual.env
 
 Options:
   --config PATH     Config file to source.
@@ -21,8 +22,9 @@ Options:
   --help            Show this help.
 
 Important:
-  This installer can erase TARGET_DISK. Set
-  DEVWORKS_I_UNDERSTAND_THIS_ERASES_DISK="yes" only after verifying the disk.
+  INSTALL_MODE=erase-disk erases TARGET_DISK.
+  INSTALL_MODE=manual-partition formats only TARGET_ROOT_PARTITION, preserves
+  TARGET_EFI_PARTITION, and requires typed confirmation in an UEFI boot.
 EOF
 }
 

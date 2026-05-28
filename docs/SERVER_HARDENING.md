@@ -44,7 +44,7 @@ ENABLE_AI_RUNTIME
 ENABLE_CONTAINER_RUNTIME
 ```
 
-The installer remains destructive in `erase-disk` mode. It is suitable for an empty server disk, not a dualboot disk.
+Use `erase-disk` only for an empty server disk. For UEFI dual boot, use `manual-partition`, which formats only the selected Linux root partition and preserves the existing EFI partition after manual confirmation.
 
 ## Required Pre-Install Files
 
@@ -118,7 +118,7 @@ sudo dw enable ai --runtime ollama --bind 127.0.0.1 --memory-max 8G --cpu-quota 
 
 ## Still Not Included
 
-- Automatic dualboot support.
+- Automatic Windows partition resize; dual boot requires administrator-prepared free space.
 - Automated restore of every application stack from `C:\root\server`.
 - Hardware-specific GPU driver validation.
 - Formal external security audit.

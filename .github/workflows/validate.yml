@@ -25,6 +25,12 @@ jobs:
             \( -name '*.sh' -o -name 'devworks-install.sh' -o -name 'devworks-autoinstall-runner' \) \
             -print0 | xargs -0 -n1 bash -n
 
+      - name: Check dual boot safety guards
+        run: |
+          set -euo pipefail
+          bash installer/tests/dualboot-safety-static-test.sh
+          bash installer/tests/release-policy-static-test.sh
+
       - name: Check required documentation
         run: |
           set -euo pipefail
@@ -36,12 +42,14 @@ jobs:
           test -f docs/THIRD_PARTY_NOTICES.md
           test -f docs/SOURCE_CODE_OFFER.md
           test -f docs/RELEASE_NOTES.md
+          test -f docs/VERIFY_RELEASE.md
+          test -f installer/profiles/dualboot-manual.env
+          test -f installer/tests/dualboot-loop-integration-test.sh
 
       - name: Check release metadata artifacts
         run: |
           set -euo pipefail
           test -f dist/devworks-server-os.iso.sha256
-          test -f dist/devworks-server-os-autoinstall.iso.sha256
           test -f dist/devworks-server-os-package-manifest.tsv
           test -f dist/devworks-server-os-package-manifest.tsv.sha256
           test -f dist/devworks-server-os-release-signing-key.asc
@@ -51,4 +59,3 @@ jobs:
           set -euo pipefail
           head -n 1 dist/devworks-server-os-package-manifest.tsv | grep -Fx 'package	version	architecture'
           test "$(wc -l < dist/devworks-server-os-package-manifest.tsv)" -gt 100
-

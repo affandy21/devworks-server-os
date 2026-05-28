@@ -15,8 +15,6 @@ Build saat ini telah mencakup ISO bootable, desktop GUI ringan, Devworks Control
 
 ![Devworks Server OS boot menu](docs/assets/screenshots/boot-menu.png)
 
-![Devworks Server OS desktop](docs/assets/screenshots/desktop.png)
-
 ## Download
 
 Release terbaru tersedia di halaman [GitHub Releases](https://github.com/affandy21/devworks-server-os/releases).
@@ -24,12 +22,13 @@ Release terbaru tersedia di halaman [GitHub Releases](https://github.com/affandy
 Asset release:
 
 - `devworks-server-os.iso`
-- `devworks-server-os-autoinstall.iso`
 - `devworks-server-os.iso.sha256`
-- `devworks-server-os-autoinstall.iso.sha256`
 - `devworks-server-os-package-manifest.tsv`
 - `devworks-server-os-release-signing-key.asc`
 - `*.asc` detached GPG signatures
+
+`devworks-server-os-autoinstall.iso` adalah aset laboratorium lama untuk disk
+VirtualBox kosong yang boleh dihapus, bukan media rilis v0.2.1 untuk PC/server.
 
 ## Dokumentasi
 
@@ -63,9 +62,9 @@ Dokumen pendukung:
 - Monitoring realtime tersedia untuk CPU, memori, disk, jaringan, dan service sistem.
 - Default install tidak menjalankan workload web, AI, container daemon, atau port publik sebelum user mengaktifkannya.
 - Command `dw` menyediakan fitur opt-in untuk web, TLS, AI runtime, container, dan template service. Nama panjang `devworks` tetap tersedia.
-- Installer menggunakan konfirmasi disk manual untuk mengurangi risiko salah memilih disk.
+- Installer menyediakan mode `erase-disk` untuk disk kosong dan `manual-partition` untuk dual boot UEFI dengan partisi Linux yang sudah dipersiapkan.
 - Installer permanen meminta username/password admin dan dapat memasang SSH key seperti OS server umum.
-- Instalasi dual-boot otomatis belum didukung. Mode installer saat ini adalah `erase-disk`.
+- Dual boot UEFI didukung melalui pilihan partisi manual; installer tidak mengecilkan partisi Windows dan tidak memformat EFI yang digunakan bersama.
 - Profil `production-server` tersedia untuk hardening server: autologin off, SSH key-first, admin web UI off, UFW ketat, web/AI opt-in.
 
 ## Aktivasi Fitur Setelah Install
@@ -85,14 +84,12 @@ sudo dw backup create --source /srv/devworks --dest /var/backups/devworks
 
 ```text
 dist/devworks-server-os.iso
-dist/devworks-server-os-autoinstall.iso
 ```
 
 Checksum build terakhir tersedia di file `.sha256`:
 
 ```text
 dist/devworks-server-os.iso.sha256
-dist/devworks-server-os-autoinstall.iso.sha256
 ```
 
 ## Struktur Proyek
@@ -117,7 +114,13 @@ devworks-server-os-package-manifest.tsv
 devworks-server-os-package-manifest.tsv.sha256
 ```
 
-Setelah OS terpasang, manifest paket baru juga dapat dibuat dengan:
+Manifest rilis harus dibuat langsung dari ISO final:
+
+```bash
+bash scripts/generate-iso-package-manifest.sh dist/devworks-server-os.iso dist/devworks-server-os-package-manifest.tsv
+```
+
+Setelah OS terpasang, manifest mesin tersebut juga dapat dibuat dengan:
 
 ```bash
 bash scripts/generate-package-manifest.sh devworks-package-manifest.tsv
@@ -136,9 +139,7 @@ Import public key dan verifikasi signature:
 ```bash
 gpg --import devworks-server-os-release-signing-key.asc
 gpg --verify devworks-server-os.iso.asc devworks-server-os.iso
-gpg --verify devworks-server-os-autoinstall.iso.asc devworks-server-os-autoinstall.iso
 sha256sum -c devworks-server-os.iso.sha256
-sha256sum -c devworks-server-os-autoinstall.iso.sha256
 ```
 
 ## Build ISO
@@ -170,6 +171,30 @@ ERASE /dev/sda
 ```
 
 Jangan gunakan ISO autoinstall di PC/laptop yang memiliki data penting.
+
+### Dual Boot Dengan Windows
+
+Gunakan ISO standar, bukan autoinstall. Dari Windows, matikan Fast Startup/hibernation, simpan BitLocker recovery key bila berlaku, lalu kecilkan partisi Windows melalui Disk Management hingga tersedia ruang kosong. Dari sesi live Devworks, buat partisi Linux pada ruang kosong tersebut dan gunakan profil:
+
+```text
+installer/profiles/dualboot-manual.env
+```
+
+Parameter penting:
+
+```bash
+INSTALL_MODE="manual-partition"
+TARGET_BOOT_MODE="efi"
+TARGET_ROOT_PARTITION="/dev/nvme0n1p6"  # partisi Linux kosong yang boleh diformat
+TARGET_EFI_PARTITION="/dev/nvme0n1p1"   # EFI Windows yang dipertahankan
+FORMAT_EFI="no"
+```
+
+Mode ini memformat hanya `TARGET_ROOT_PARTITION`, menolak partisi bertipe Windows/Recovery/EFI sebagai root, mempertahankan EFI, menyimpan backup tabel partisi, dan menambahkan `Windows Boot Manager` ke menu GRUB bila loader Microsoft ditemukan.
+
+### Dukungan GPU
+
+Sistem hasil instalasi menyertakan firmware dasar AMD, Intel, dan NVIDIA. Driver proprietary NVIDIA/CUDA tetap opt-in setelah instalasi. Untuk GPU Intel Arc atau AMD yang lebih baru, `ENABLE_HARDWARE_BACKPORTS="yes"` tersedia sebagai pilihan saat instalasi setelah kompatibilitas hardware diverifikasi.
 
 ## Upstream dan Source Code
 

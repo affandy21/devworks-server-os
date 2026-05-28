@@ -66,50 +66,7 @@ function Remove-CenteredDesktopLogo {
     [int]$TargetHeight
   )
 
-  $x1 = [Math]::Max(0, [int]($TargetWidth * 0.445))
-  $x2 = [Math]::Min($TargetWidth - 1, [int]($TargetWidth * 0.555))
-  $y1 = [Math]::Max(0, [int]($TargetHeight * 0.425))
-  $y2 = [Math]::Min($TargetHeight - 1, [int]($TargetHeight * 0.575))
-  $sampleOffset = [Math]::Max(18, [int]($TargetHeight * 0.18))
-
-  for ($pass = 0; $pass -lt 3; $pass++) {
-    for ($y = $y1; $y -le $y2; $y++) {
-      for ($x = $x1; $x -le $x2; $x++) {
-        $sx = $x
-        $sy = [Math]::Max(0, $y - $sampleOffset)
-        $left = $TargetBitmap.GetPixel([Math]::Max(0, $x1 - 8), $y)
-        $right = $TargetBitmap.GetPixel([Math]::Min($TargetWidth - 1, $x2 + 8), $y)
-        $top = $TargetBitmap.GetPixel($sx, $sy)
-        $bottom = $TargetBitmap.GetPixel($sx, [Math]::Min($TargetHeight - 1, $y2 + 8))
-        $horizontal = ($x - $x1) / [Math]::Max(1, ($x2 - $x1))
-
-        $r = [int]((($left.R * (1 - $horizontal)) + ($right.R * $horizontal) + $top.R + $bottom.R) / 3)
-        $g = [int]((($left.G * (1 - $horizontal)) + ($right.G * $horizontal) + $top.G + $bottom.G) / 3)
-        $b = [int]((($left.B * (1 - $horizontal)) + ($right.B * $horizontal) + $top.B + $bottom.B) / 3)
-
-        $TargetBitmap.SetPixel($x, $y, [System.Drawing.Color]::FromArgb($r, $g, $b))
-      }
-    }
-  }
-
-  $blur = [System.Drawing.Graphics]::FromImage($TargetBitmap)
-  try {
-    $blur.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
-    $blur.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
-    $src = New-Object System.Drawing.Rectangle $x1, $y1, ($x2 - $x1 + 1), ($y2 - $y1 + 1)
-    $small = New-Object System.Drawing.Bitmap ([Math]::Max(1, [int]($src.Width / 8))), ([Math]::Max(1, [int]($src.Height / 8)))
-    $smallGraphics = [System.Drawing.Graphics]::FromImage($small)
-    try {
-      $smallGraphics.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
-      $smallGraphics.DrawImage($TargetBitmap, (New-Object System.Drawing.Rectangle 0, 0, $small.Width, $small.Height), $src, [System.Drawing.GraphicsUnit]::Pixel)
-      $blur.DrawImage($small, $src, (New-Object System.Drawing.Rectangle 0, 0, $small.Width, $small.Height), [System.Drawing.GraphicsUnit]::Pixel)
-    } finally {
-      $smallGraphics.Dispose()
-      $small.Dispose()
-    }
-  } finally {
-    $blur.Dispose()
-  }
+  throw "RemoveDesktopLogo is disabled: use a logo-free SourceImagePath for a clean boot splash."
 }
 
 function Draw-HeaderText {
@@ -136,8 +93,8 @@ function Draw-HeaderText {
   try {
     $TargetGraphics.DrawString("Devworks Server OS", $fontTitle, $shadowBrush, $textX + 2, $titleY + 2)
     $TargetGraphics.DrawString("Devworks Server OS", $fontTitle, $whiteBrush, $textX, $titleY)
-    $TargetGraphics.DrawString("v0.1.1 Server Hardening", $fontSub, $shadowBrush, $textX + 1, $titleY + [Math]::Round($titleSize * 1.25) + 1)
-    $TargetGraphics.DrawString("v0.1.1 Server Hardening", $fontSub, $cyanBrush, $textX, $titleY + [Math]::Round($titleSize * 1.25))
+    $TargetGraphics.DrawString("v0.2.1 Dual Boot Hardware", $fontSub, $shadowBrush, $textX + 1, $titleY + [Math]::Round($titleSize * 1.25) + 1)
+    $TargetGraphics.DrawString("v0.2.1 Dual Boot Hardware", $fontSub, $cyanBrush, $textX, $titleY + [Math]::Round($titleSize * 1.25))
     $TargetGraphics.DrawString("Installer permanen | GUI native | monitoring server", $fontLine, $shadowBrush, $textX + 1, $titleY + [Math]::Round($titleSize * 2.05) + 1)
     $TargetGraphics.DrawString("Installer permanen | GUI native | monitoring server", $fontLine, $whiteBrush, $textX, $titleY + [Math]::Round($titleSize * 2.05))
   } finally {

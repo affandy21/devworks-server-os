@@ -89,6 +89,7 @@ Installer permanen memakai mode:
 
 ```text
 INSTALL_MODE=erase-disk
+INSTALL_MODE=manual-partition
 ```
 
 ISO standar memakai:
@@ -106,10 +107,12 @@ TARGET_DISK=/dev/sda
 DEVWORKS_I_UNDERSTAND_THIS_ERASES_DISK=yes
 ```
 
+Untuk dual boot UEFI, `manual-partition` hanya memformat partisi root Linux yang dipilih dan mempertahankan partisi EFI Windows.
+
 ## Batasan Versi Ini
 
-- Dualboot otomatis belum tersedia.
-- Mode installer non-destructive belum tersedia.
+- Resize partisi Windows otomatis belum tersedia; ruang dual boot disiapkan melalui Windows lebih dahulu.
+- Mode `manual-partition` mendukung UEFI saja dan tetap memerlukan konfirmasi manusia.
 - Repository update OS milik Devworks belum tersedia.
 - Driver GPU AI production perlu disesuaikan dengan hardware target.
 - Autentikasi dan role management untuk admin tooling perlu dikeraskan sebelum production publik.

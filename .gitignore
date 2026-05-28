@@ -13,7 +13,9 @@ iso/cache/
 iso/binary/
 iso/.build/
 iso/config/hooks/live/
-iso/config/hooks/normal/
+iso/config/hooks/normal/*
+!iso/config/hooks/normal/010-halo-system.chroot
+!iso/config/hooks/normal/020-halo-desktop.chroot
 iso/*.iso
 iso/*.img
 iso/*.log

@@ -10,19 +10,15 @@ Download these files from the GitHub release:
 devworks-server-os.iso
 devworks-server-os.iso.sha256
 devworks-server-os.iso.asc
-devworks-server-os-autoinstall.iso
-devworks-server-os-autoinstall.iso.sha256
-devworks-server-os-autoinstall.iso.asc
 devworks-server-os-release-signing-key.asc
-```
-
-Optional but recommended:
-
-```text
 devworks-server-os-package-manifest.tsv
 devworks-server-os-package-manifest.tsv.sha256
 devworks-server-os-package-manifest.tsv.asc
 ```
+
+The separately published `devworks-server-os-autoinstall.iso` is a legacy lab
+asset for an empty disposable VirtualBox disk only. It is not the v0.2.1 media
+for a physical server or a dual boot computer.
 
 ## 2. Confirm Signing Key
 
@@ -45,7 +41,6 @@ Confirm the displayed fingerprint matches the expected fingerprint above.
 
 ```bash
 gpg --verify devworks-server-os.iso.asc devworks-server-os.iso
-gpg --verify devworks-server-os-autoinstall.iso.asc devworks-server-os-autoinstall.iso
 ```
 
 Expected result includes:
@@ -58,7 +53,6 @@ Good signature from "Devworks Server OS Release <affandy21@users.noreply.github.
 
 ```bash
 sha256sum -c devworks-server-os.iso.sha256
-sha256sum -c devworks-server-os-autoinstall.iso.sha256
 sha256sum -c devworks-server-os-package-manifest.tsv.sha256
 ```
 
@@ -68,7 +62,11 @@ Expected result:
 OK
 ```
 
-## 5. Safety Reminder
+## 5. Installer Mode and Safety
 
-The current installer mode is `erase-disk`. Do not install on a physical PC or server unless the target disk is backed up and you are certain the selected disk can be erased.
+The standard ISO supports two intentional modes:
 
+- `erase-disk` erases the confirmed target disk and is appropriate only for an empty dedicated server disk.
+- `manual-partition` preserves an existing UEFI/EFI System Partition and formats only the explicitly selected Linux root partition. Use this for dual boot after shrinking Windows and creating a dedicated Linux partition.
+
+Both modes require a typed confirmation. Back up important data first. The installer never resizes Windows partitions automatically, and the autoinstall ISO must not be used on a physical disk or any machine containing data.

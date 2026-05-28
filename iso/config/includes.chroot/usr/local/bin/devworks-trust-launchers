@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+marker="${HOME}/.config/devworks/launchers-trusted"
+launcher="${HOME}/Desktop/devworks-control-center.desktop"
+
+[[ -e "${marker}" ]] && exit 0
+mkdir -p "$(dirname "${marker}")"
+if [[ -f "${launcher}" ]]; then
+  chmod u+x "${launcher}"
+  command -v gio >/dev/null 2>&1 || exit 0
+  gio set -t string "${launcher}" metadata::trusted true >/dev/null 2>&1 || exit 0
+fi
+touch "${marker}"

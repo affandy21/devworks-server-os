@@ -2,7 +2,7 @@
 Type=Application
 Name=Devworks Control Center
 Comment=Open native Devworks Server OS monitoring software
-Exec=/usr/local/bin/devworks-open-admin
+Exec=/opt/devworks/control-center/devworks-control-center
 Icon=devworks-control-center
 Terminal=false
 Categories=System;Monitor;

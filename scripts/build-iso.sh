@@ -16,6 +16,8 @@ apt-get install -y live-build ca-certificates rsync
 
 rsync -a --delete "${PROJECT_DIR}/admin-ui/" "${ISO_DIR}/config/includes.chroot/opt/devworks/admin-ui/"
 rsync -a --delete "${PROJECT_DIR}/installer/" "${ISO_DIR}/config/includes.chroot/opt/devworks/installer/"
+install -D -m 0755 "${PROJECT_DIR}/scripts/devworks" \
+  "${ISO_DIR}/config/includes.chroot/opt/devworks/scripts/devworks"
 find "${ISO_DIR}/config/includes.chroot/opt/devworks/installer" -type f -name '*.sh' -exec chmod +x {} +
 chmod +x "${ISO_DIR}/config/includes.chroot/opt/devworks/installer/devworks-install.sh"
 install -D -m 0644 "${PROJECT_DIR}/services/devworks-admin-ui.service" \
@@ -28,14 +30,14 @@ lb clean
 lb config \
   --mode debian \
   --distribution bookworm \
-  --archive-areas "main contrib non-free-firmware" \
+  --archive-areas "main contrib non-free non-free-firmware" \
   --binary-images iso-hybrid \
   --debian-installer live \
   --security false \
   --apt-indices false \
   --iso-application "Devworks Server OS" \
   --iso-publisher "Devworks Server OS project; https://github.com/affandy21/devworks-server-os" \
-  --iso-volume "Devworks Server OS 0.1.1" \
+  --iso-volume "DEVWORKS_021" \
   --bootappend-live "boot=live components hostname=devworks-server username=devworks user-fullname=Devworks"
 lb build
 

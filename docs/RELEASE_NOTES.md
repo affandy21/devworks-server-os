@@ -52,8 +52,8 @@ GPG fingerprint:
 
 ## Batasan
 
-- Dualboot otomatis belum didukung.
-- Mode installer saat ini masih `erase-disk`.
+- Dual boot hanya didukung dengan mode manual-partition dan UEFI; installer
+  tidak mengecilkan partisi Windows otomatis.
 - ISO autoinstall tidak boleh dipakai pada mesin yang memiliki data penting.
 - Validasi server fisik tetap harus dilakukan sebelum production.
 
@@ -159,3 +159,48 @@ Release line ini menambahkan prosedur operasional agar Devworks Server OS lebih 
 - Web, AI, dan container daemon tetap tidak auto-start pada instalasi awal.
 - Backup lokal membantu rollback cepat, tetapi server publik tetap membutuhkan backup off-server.
 - `dw audit` bisa menghasilkan WARN untuk service yang memang sengaja dibuka ke publik; administrator harus mencocokkan hasil audit dengan desain deployment.
+
+## v0.2.1-dualboot-hardware
+
+Release line ini menambahkan instalasi berdampingan dengan Windows secara manual dan menutup kekurangan firmware pada hasil instalasi fisik.
+
+### Added
+
+- Mode installer `manual-partition` untuk dual boot UEFI.
+- Profil `installer/profiles/dualboot-manual.env`.
+- Guard yang melarang format EFI di mode dual boot.
+- Konfirmasi partisi eksplisit sebelum root Linux diformat.
+- Backup tabel partisi GPT sebelum instalasi dual boot.
+- Deteksi loader EFI Microsoft dan menu GRUB `Windows Boot Manager`.
+- Firmware AMD, Intel, dan NVIDIA dasar pada sistem hasil instalasi.
+- Opsi `ENABLE_HARDWARE_BACKPORTS` untuk GPU/perangkat lebih baru.
+- Static safety test untuk guard dual boot di GitHub Actions.
+- Integration test pada disk GPT virtual untuk membuktikan ESP Windows dipertahankan dan partisi Microsoft data ditolak.
+- Verifikasi isi ISO otomatis serta package manifest yang diambil langsung dari ISO final.
+- Shortcut Control Center menjalankan aplikasi GTK native langsung dan ditandai tepercaya satu kali pada sesi desktop.
+- Sesi live mem-mask nginx, admin web UI, dan fail2ban sampai konfigurasi instalasi permanen diterapkan.
+- `dw` dan `devworks` tersedia di PATH user standar melalui `/usr/local/bin`.
+
+### Safety Notes
+
+- Installer tidak mengecilkan partisi Windows; ruang harus disiapkan dari Windows terlebih dahulu.
+- Dual boot hanya didukung dalam boot UEFI.
+- `devworks-server-os-autoinstall.iso` tetap tidak aman untuk PC dengan data penting.
+- Driver proprietary NVIDIA dan CUDA tetap opt-in sesuai GPU yang dipasang.
+
+### Verified Artifact
+
+```text
+SHA256: 76182a46025ef6d0f1c3b4680c981e251469699fa033997de530a6f713af583f
+GPG fingerprint: 426072F517789C47A914345A4F53E388EE9884EA
+```
+
+### Final QA
+
+- ISO content verification: passed.
+- GPG signature verification: passed.
+- VirtualBox UEFI clean install: passed.
+- Permanent disk boot without ISO: passed.
+- Runtime policy: SSH/UFW active; nginx, web health, AI, Docker, and admin web
+  UI not active until administrator opt-in.
+- Native Devworks Control Center: passed.

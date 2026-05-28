@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cat >/etc/sysctl.d/99-devworks-server.conf <<'EOF'
+net.ipv4.ip_forward = 0
+net.ipv4.conf.all.accept_redirects = 0
+net.ipv4.conf.default.accept_redirects = 0
+net.ipv6.conf.all.accept_redirects = 0
+net.ipv6.conf.default.accept_redirects = 0
+net.ipv4.conf.all.send_redirects = 0
+net.ipv4.conf.default.send_redirects = 0
+net.ipv4.conf.all.rp_filter = 1
+net.ipv4.conf.default.rp_filter = 1
+net.ipv4.tcp_syncookies = 1
+fs.file-max = 1048576
+vm.swappiness = 10
+EOF
+
+sed -i 's/^#\?PermitRootLogin .*/PermitRootLogin no/' /etc/ssh/sshd_config
+sed -i 's/^#\?PasswordAuthentication .*/PasswordAuthentication no/' /etc/ssh/sshd_config
+sed -i 's/^#\?X11Forwarding .*/X11Forwarding no/' /etc/ssh/sshd_config
+
+mkdir -p /etc/systemd/system/multi-user.target.wants
+ln -sf /lib/systemd/system/ssh.service \
+  /etc/systemd/system/multi-user.target.wants/ssh.service
+ln -sf /lib/systemd/system/chrony.service \
+  /etc/systemd/system/multi-user.target.wants/chrony.service
+
+# Live media provides packages for installation, but does not expose web
+# workloads or run fail2ban before the installed-system profile is configured.
+rm -f /etc/systemd/system/multi-user.target.wants/nginx.service \
+  /etc/systemd/system/multi-user.target.wants/devworks-admin-ui.service \
+  /etc/systemd/system/multi-user.target.wants/fail2ban.service
+ln -sf /dev/null /etc/systemd/system/nginx.service
+ln -sf /dev/null /etc/systemd/system/devworks-admin-ui.service
+ln -sf /dev/null /etc/systemd/system/fail2ban.service

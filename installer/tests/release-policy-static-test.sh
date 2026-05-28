@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+LIVE_HOOK="${PROJECT_DIR}/iso/config/hooks/normal/010-halo-system.chroot"
+PACKAGE_LIST="${PROJECT_DIR}/iso/config/package-lists/halo-server.list.chroot"
+BASE_MODULE="${PROJECT_DIR}/installer/modules/02-base-system.sh"
+GUI_MODULE="${PROJECT_DIR}/installer/modules/09-gui-monitoring.sh"
+DESKTOP_ENTRY="${PROJECT_DIR}/iso/config/includes.chroot/usr/share/applications/devworks-control-center.desktop"
+TRUST_AUTOSTART="${PROJECT_DIR}/iso/config/includes.chroot/etc/xdg/autostart/devworks-trust-launchers.desktop"
+
+! grep -Fq 'multi-user.target.wants/devworks-admin-ui.service' "${LIVE_HOOK}"
+! grep -Fq 'multi-user.target.wants/nginx.service' "${LIVE_HOOK}"
+! grep -Fq 'multi-user.target.wants/fail2ban.service' "${LIVE_HOOK}"
+grep -Fq 'ln -sf /dev/null /etc/systemd/system/nginx.service' "${LIVE_HOOK}"
+grep -Fq 'ln -sf /dev/null /etc/systemd/system/fail2ban.service' "${LIVE_HOOK}"
+grep -Fxq 'firmware-amd-graphics' "${PACKAGE_LIST}"
+grep -Fxq 'firmware-misc-nonfree' "${PACKAGE_LIST}"
+grep -Fxq 'firmware-nvidia-gsp' "${PACKAGE_LIST}"
+grep -Fq 'firmware-amd-graphics firmware-misc-nonfree firmware-nvidia-gsp' "${BASE_MODULE}"
+grep -Fq 'main contrib non-free non-free-firmware' "${BASE_MODULE}"
+grep -Fxq 'Exec=/opt/devworks/control-center/devworks-control-center' "${DESKTOP_ENTRY}"
+grep -Fq 'Exec=/opt/devworks/control-center/devworks-control-center' "${GUI_MODULE}"
+grep -Fxq 'Exec=/usr/local/bin/devworks-trust-launchers' "${TRUST_AUTOSTART}"
+! grep -Fq 'Exec=/opt/devworks/control-center/devworks-control-center' "${TRUST_AUTOSTART}"
+grep -Fxq 'libglib2.0-bin' "${PACKAGE_LIST}"
+grep -Fxq 'libgtk-3-bin' "${PACKAGE_LIST}"
+grep -Fxq 'desktop-file-utils' "${PACKAGE_LIST}"
+grep -Fq 'libglib2.0-bin' "${GUI_MODULE}"
+grep -Fq 'libgtk-3-bin' "${GUI_MODULE}"
+grep -Fq 'desktop-file-utils' "${GUI_MODULE}"
+
+echo "Release policy static checks passed."

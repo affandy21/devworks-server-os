@@ -29,13 +29,14 @@ Status saat ini:
 - Devworks Control Center tidak terbuka otomatis saat startup.
 - Devworks Control Center menampilkan metrik CPU, memory, disk, network, service, dan grafik realtime.
 - Menu Applications memakai icon grid Devworks, bukan logo utama.
-- Installer memiliki konfirmasi manual disk untuk mengurangi risiko salah hapus disk.
+- Installer menyediakan `erase-disk` untuk disk kosong serta `manual-partition` untuk dual boot UEFI dengan partisi Linux yang dipilih manual.
+- Sistem hasil instalasi membawa firmware grafis dasar AMD, Intel, dan NVIDIA; driver CUDA/NVIDIA proprietary tetap dipasang hanya bila dibutuhkan.
 
 Catatan penting:
 
 - Sistem ini adalah OS kustom berbasis Debian, bukan kernel baru dari nol.
 - Stabilitas production tetap perlu validasi hardware, backup, dan uji restart di target sebenarnya.
-- Dualboot belum otomatis. Mode installer saat ini adalah erase-disk dengan konfirmasi manual.
+- Dual boot tidak otomatis melakukan resize Windows, tetapi instalasi berdampingan didukung melalui mode `manual-partition` yang mempertahankan EFI.
 
 ## 3. File ISO
 
@@ -43,14 +44,12 @@ File build berada di:
 
 ```text
 dist/devworks-server-os.iso
-dist/devworks-server-os-autoinstall.iso
 ```
 
 Checksum build terakhir tersedia di file `.sha256`:
 
 ```text
 dist/devworks-server-os.iso.sha256
-dist/devworks-server-os-autoinstall.iso.sha256
 ```
 
 Release tambahan:
@@ -72,7 +71,6 @@ Contoh cek checksum di Windows PowerShell:
 
 ```powershell
 Get-FileHash .\dist\devworks-server-os.iso -Algorithm SHA256
-Get-FileHash .\dist\devworks-server-os-autoinstall.iso -Algorithm SHA256
 ```
 
 Fingerprint GPG signing key:
@@ -99,13 +97,16 @@ dist/devworks-server-os.iso
 
 Gunakan ini untuk testing manual, VirtualBox, laptop, atau PC server kosong. Installer akan meminta konfirmasi disk sebelum menghapus dan memasang sistem.
 
-### ISO Autoinstall
+### ISO Autoinstall Lama
 
 ```text
 dist/devworks-server-os-autoinstall.iso
 ```
 
-Gunakan hanya untuk VirtualBox atau target uji yang memang boleh dihapus otomatis. Profil ini memakai target `/dev/sda` dan tidak cocok untuk PC/laptop yang punya data penting.
+Jika aset ini masih diarsipkan, gunakan hanya untuk VirtualBox atau target uji
+yang memang boleh dihapus otomatis. Profil ini memakai target `/dev/sda`,
+tidak termasuk media rilis v0.2.1, dan tidak cocok untuk PC/laptop yang punya
+data penting.
 
 ## 5. Kebutuhan Minimum
 
@@ -152,13 +153,21 @@ Installer permanen tersedia melalui skrip:
 /opt/devworks/installer/install-devworks-os.sh
 ```
 
-Mode installer saat ini:
+Mode installer untuk disk kosong:
 
 ```text
 INSTALL_MODE=erase-disk
 ```
 
 Artinya installer akan membuat sistem baru di disk target dan menghapus isi disk tersebut setelah konfirmasi.
+
+Mode installer dual boot UEFI:
+
+```text
+INSTALL_MODE=manual-partition
+```
+
+Mode ini memasang sistem ke partisi root Linux yang dipilih dan mempertahankan partisi EFI yang sudah digunakan Windows. Installer tidak melakukan resize partisi Windows.
 
 Alur aman ISO standar:
 
@@ -196,26 +205,46 @@ Perilaku:
 - Jika `TARGET_DISK=auto`, installer akan menampilkan disk dan meminta pilihan.
 - Jika `DEVWORKS_MANUAL_CONFIRM_DISK=yes`, installer meminta kalimat konfirmasi.
 - Jika disk target sedang mounted, installer menolak kecuali override diaktifkan.
-- Jika `INSTALL_MODE` bukan `erase-disk`, installer berhenti karena mode lain belum didukung.
+- Jika `INSTALL_MODE=manual-partition`, installer hanya bekerja di UEFI, mewajibkan root dan EFI pada disk yang sama, serta menolak `FORMAT_EFI=yes`.
 
-## 9. Dualboot
+## 9. Dual Boot Windows dan Devworks
 
-Status dualboot:
+Status dual boot:
 
 ```text
-Belum didukung otomatis.
+Didukung secara manual pada komputer UEFI.
 ```
 
-Manual confirm disk membantu mencegah salah pilih disk, tetapi belum membuat installer aman untuk dualboot. Dualboot butuh workflow terpisah:
+Installer tidak mengecilkan partisi Windows dan tidak membuat keputusan partisi secara otomatis. Alur yang aman:
 
-- Deteksi partisi yang sudah ada.
-- Resize partisi tanpa merusak data.
-- Install ke partisi kosong yang dipilih.
-- Konfigurasi GRUB agar OS lama tetap terdeteksi.
-- Backup tabel partisi sebelum perubahan.
-- Konfirmasi tambahan untuk setiap operasi destructive.
+1. Backup data dan simpan recovery key BitLocker bila aktif.
+2. Matikan Fast Startup serta hibernation Windows.
+3. Kecilkan partisi Windows melalui Disk Management Windows.
+4. Boot ISO standar Devworks dalam mode UEFI.
+5. Buat/pilih partisi Linux kosong dari ruang yang telah disediakan.
+6. Gunakan profil `installer/profiles/dualboot-manual.env`.
+7. Isi partisi root Linux dan EFI yang sudah ada:
 
-Untuk saat ini, jika ingin dualboot, gunakan disk terpisah atau lakukan partisi manual dengan backup penuh terlebih dahulu.
+```bash
+INSTALL_MODE="manual-partition"
+TARGET_BOOT_MODE="efi"
+TARGET_ROOT_PARTITION="/dev/nvme0n1p6"
+TARGET_EFI_PARTITION="/dev/nvme0n1p1"
+TARGET_SWAP_PARTITION=""
+FORMAT_ROOT="yes"
+FORMAT_EFI="no"
+DEVWORKS_MANUAL_CONFIRM_DISK="yes"
+```
+
+Sebelum format root, installer meminta konfirmasi yang menyebut kedua partisi secara eksplisit:
+
+```text
+INSTALL /dev/nvme0n1p6 KEEP-EFI /dev/nvme0n1p1
+```
+
+Partisi EFI tidak diformat. Bila loader EFI Microsoft ditemukan, menu GRUB menambahkan `Windows Boot Manager`.
+
+Jangan gunakan ISO autoinstall untuk dual boot atau mesin yang memiliki data penting.
 
 ## 10. Desktop dan GUI
 
@@ -534,7 +563,7 @@ Syarat aman:
 - Gunakan ISO standar, bukan autoinstall.
 - Pastikan disk target benar.
 - Untuk server kosong, mode erase-disk cocok.
-- Untuk dualboot, jangan gunakan installer ini sebelum workflow dualboot non-destructive dibuat.
+- Untuk dual boot UEFI, gunakan ISO standar dan profil `dualboot-manual.env`; jangan gunakan autoinstall.
 
 Rekomendasi untuk server kosong:
 
@@ -546,8 +575,8 @@ Rekomendasi untuk server kosong:
 
 Batasan yang masih perlu dicatat:
 
-- Dualboot otomatis belum tersedia.
-- Installer saat ini fokus pada erase-disk.
+- Dual boot masih membutuhkan persiapan partisi manual dari Windows; installer tidak melakukan resize otomatis.
+- Mode `manual-partition` saat ini hanya mendukung UEFI dan partisi EFI/root pada disk yang sama.
 - Driver GPU AI production belum dibuat universal untuk semua model GPU.
 - Belum ada sistem update OS versi resmi seperti repository sendiri.
 - Hardening production perlu divalidasi ulang dengan domain, IP publik, TLS, backup off-server, dan model deployment web/AI.
@@ -556,7 +585,7 @@ Batasan yang masih perlu dicatat:
 
 Roadmap yang disarankan:
 
-1. Installer dualboot non-destructive.
+1. Pengujian matrix dual boot pada lebih banyak versi Windows dan layout EFI.
 2. Wizard setup awal untuk user, password, hostname, timezone, dan network.
 3. Devworks repository internal untuk update paket OS.
 4. Snapshot dan rollback otomatis.

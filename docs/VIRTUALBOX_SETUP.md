@@ -30,6 +30,14 @@ EFI: off untuk jalur BIOS sederhana
 Network: NAT
 ```
 
+Untuk menguji mode dual boot/manual partition, buat VM terpisah dengan:
+
+```text
+Name: Devworks Dualboot Test v021
+Disk: 40 GB atau lebih, VDI dynamic, hanya untuk pengujian
+EFI: on
+```
+
 Port forwarding NAT yang disarankan:
 
 ```text
@@ -98,6 +106,26 @@ TARGET_DISK=/dev/sda
 ```
 
 Jangan gunakan ISO autoinstall pada PC/laptop yang memiliki data penting.
+
+## Uji Manual Dual Boot UEFI
+
+Tes ini menggunakan VM UEFI baru, bukan PC fisik dan bukan VM produksi:
+
+1. Boot ISO standar pada VM dengan `EFI: on`.
+2. Buat tabel GPT pada disk virtual.
+3. Buat ESP FAT32, satu partisi data simulasi Windows yang tidak boleh berubah, dan satu partisi Linux root.
+4. Salin `installer/profiles/dualboot-manual.env`, lalu isi `TARGET_ROOT_PARTITION` dan `TARGET_EFI_PARTITION`.
+5. Pastikan `INSTALL_MODE="manual-partition"` dan `FORMAT_EFI="no"`.
+6. Jalankan installer dengan profil tersebut.
+7. Verifikasi installer meminta konfirmasi `INSTALL ... KEEP-EFI ...`.
+8. Setelah instalasi, pastikan partisi data simulasi tetap memiliki UUID yang sama dan backup tabel GPT terdapat di `/var/backups/devworks-installer/`.
+9. Lepas ISO, boot dari disk virtual dan ulangi restart minimal tiga kali.
+
+Pengujian otomatis untuk aturan tidak merusak partisi juga tersedia:
+
+```bash
+sudo bash installer/tests/dualboot-loop-integration-test.sh
+```
 
 ## Checklist Setelah Boot Dari Disk
 

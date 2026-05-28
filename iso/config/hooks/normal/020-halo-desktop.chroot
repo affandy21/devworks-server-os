@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+chmod +x /usr/local/bin/devworks-open-admin
+chmod +x /usr/local/bin/devworks-trust-launchers
+chmod +x /opt/devworks/control-center/devworks-control-center
+rm -f /etc/xdg/autostart/devworks-admin.desktop
+mkdir -p /etc/skel/Desktop /usr/share/applications
+if [ -f /etc/skel/Desktop/devworks-admin.desktop ]; then
+  mv /etc/skel/Desktop/devworks-admin.desktop /etc/skel/Desktop/devworks-control-center.desktop
+fi
+cp /usr/share/applications/devworks-control-center.desktop /etc/skel/Desktop/devworks-control-center.desktop
+chmod +x /etc/skel/Desktop/devworks-control-center.desktop
+gtk-update-icon-cache -f -t /usr/share/icons/hicolor || true
+update-desktop-database /usr/share/applications || true
+
+mkdir -p /etc/systemd/system/display-manager.service.wants
+mkdir -p /etc/systemd/system/graphical.target.wants
+mkdir -p /etc/systemd/system/multi-user.target.wants
+mkdir -p /etc/systemd/system/network-online.target.wants
+ln -sf /lib/systemd/system/lightdm.service /etc/systemd/system/display-manager.service
+ln -sf /lib/systemd/system/lightdm.service /etc/systemd/system/graphical.target.wants/lightdm.service
+ln -sf /lib/systemd/system/NetworkManager.service /etc/systemd/system/multi-user.target.wants/NetworkManager.service
+ln -sf /lib/systemd/system/NetworkManager-wait-online.service /etc/systemd/system/network-online.target.wants/NetworkManager-wait-online.service
+ln -sf /lib/systemd/system/graphical.target /etc/systemd/system/default.target
+
+cat >/etc/os-release <<'EOF'
+PRETTY_NAME="Devworks Server OS 0.2.1 Dual Boot Hardware"
+NAME="Devworks Server OS"
+VERSION_ID="0.2.1"
+VERSION="0.2.1 Dual Boot Hardware"
+ID=devworks
+ID_LIKE=debian
+HOME_URL="https://github.com/affandy21/devworks-server-os"
+SUPPORT_URL="https://github.com/affandy21/devworks-server-os/issues"
+BUG_REPORT_URL="https://github.com/affandy21/devworks-server-os/issues"
+EOF
+
+cat >/etc/lsb-release <<'EOF'
+DISTRIB_ID=Devworks
+DISTRIB_RELEASE=0.2.1
+DISTRIB_CODENAME=server
+DISTRIB_DESCRIPTION="Devworks Server OS 0.2.1 Dual Boot Hardware"
+EOF

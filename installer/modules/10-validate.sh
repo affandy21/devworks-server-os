@@ -21,6 +21,18 @@ chroot_run systemctl is-enabled ssh
 chroot_run test -f /etc/sysctl.d/98-devworks-production-hardening.conf
 chroot_run test -x /usr/local/sbin/devworks
 chroot_run test -L /usr/local/sbin/dw
+chroot_run test -x /usr/local/bin/devworks
+chroot_run test -x /usr/local/bin/dw
+if [[ "${TARGET_BOOT_MODE:-auto}" == "efi" ]] ||
+   { [[ "${TARGET_BOOT_MODE:-auto}" == "auto" ]] && [[ -d /sys/firmware/efi ]]; }; then
+  chroot_run test -f /boot/efi/EFI/BOOT/BOOTX64.EFI
+fi
+chroot_run test -f /lib/firmware/amdgpu/vega10_ce.bin || log_warn "AMD firmware marker was not found; verify graphics firmware package on this hardware."
+if [[ "${INSTALL_MODE:-erase-disk}" == "manual-partition" ]] &&
+   [[ -f "${INSTALL_ROOT}/boot/efi/EFI/Microsoft/Boot/bootmgfw.efi" ]]; then
+  chroot_run test -x /etc/grub.d/42_devworks_windows
+  chroot_run grep -F "Windows Boot Manager" /boot/grub/grub.cfg
+fi
 if chroot_run bash -c 'command -v nginx >/dev/null 2>&1'; then
   chroot_run nginx -t
 fi
@@ -52,7 +64,9 @@ fi
 if is_yes "${ENABLE_GUI:-yes}"; then
   chroot_run systemctl is-enabled lightdm
   chroot_run test -f /usr/local/bin/devworks-open-admin
+  chroot_run test -x /usr/local/bin/devworks-trust-launchers
   chroot_run test -f /usr/share/applications/devworks-control-center.desktop
+  chroot_run grep -Fx 'Exec=/opt/devworks/control-center/devworks-control-center' /usr/share/applications/devworks-control-center.desktop
   chroot_run test -f /etc/skel/Desktop/devworks-control-center.desktop
   chroot_run test -f "/home/${ADMIN_USER}/Desktop/devworks-control-center.desktop"
   chroot_run test ! -f /etc/xdg/autostart/devworks-admin.desktop
@@ -68,6 +82,8 @@ GUI enabled: ${ENABLE_GUI:-yes}
 Web service: ${WEB_SERVICE_NAME:-devworks-web}
 AI service: ${AI_SERVICE_NAME:-devworks-ai}
 Default workload policy: web/AI/container services disabled until user opt-in
+Install mode: ${INSTALL_MODE:-erase-disk}
+Shared EFI preserved: $([[ "${INSTALL_MODE:-erase-disk}" == "manual-partition" ]] && echo yes || echo no)
 EOF
 
 log_info "Validation complete."

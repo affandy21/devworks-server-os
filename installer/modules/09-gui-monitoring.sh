@@ -16,7 +16,7 @@ log_info "Installing GUI and Devworks native monitoring"
 apt_install_target \
   xorg dbus-x11 lightdm lightdm-gtk-greeter xfce4 xfce4-terminal \
   network-manager-gnome policykit-1 fonts-dejavu fonts-liberation \
-  python3 python3-gi gir1.2-gtk-3.0
+  python3 python3-gi gir1.2-gtk-3.0 libglib2.0-bin libgtk-3-bin desktop-file-utils
 
 chroot_run systemctl enable lightdm
 chroot_run systemctl set-default graphical.target
@@ -90,7 +90,7 @@ EOF
 Type=Application
 Name=Devworks Control Center
 Comment=Open native Devworks Server OS monitoring software
-Exec=/usr/local/bin/devworks-open-admin
+Exec=/opt/devworks/control-center/devworks-control-center
 Icon=devworks-control-center
 Terminal=false
 Categories=System;Monitor;
@@ -101,6 +101,34 @@ EOF
   chmod 0755 "${INSTALL_ROOT}/etc/skel/Desktop/devworks-control-center.desktop"
   rm -f "${INSTALL_ROOT}/etc/skel/Desktop/devworks-admin.desktop" \
     "${INSTALL_ROOT}/etc/xdg/autostart/devworks-admin.desktop"
+  mkdir -p "${INSTALL_ROOT}/etc/xdg/autostart"
+  cat > "${INSTALL_ROOT}/usr/local/bin/devworks-trust-launchers" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+marker="${HOME}/.config/devworks/launchers-trusted"
+launcher="${HOME}/Desktop/devworks-control-center.desktop"
+[[ -e "${marker}" ]] && exit 0
+mkdir -p "$(dirname "${marker}")"
+if [[ -f "${launcher}" ]]; then
+  chmod u+x "${launcher}"
+  command -v gio >/dev/null 2>&1 || exit 0
+  gio set -t string "${launcher}" metadata::trusted true >/dev/null 2>&1 || exit 0
+fi
+touch "${marker}"
+EOF
+  chmod 0755 "${INSTALL_ROOT}/usr/local/bin/devworks-trust-launchers"
+  cat > "${INSTALL_ROOT}/etc/xdg/autostart/devworks-trust-launchers.desktop" <<'EOF'
+[Desktop Entry]
+Type=Application
+Name=Prepare Devworks Desktop Launchers
+Comment=Trust locally installed Devworks launcher files once
+Exec=/usr/local/bin/devworks-trust-launchers
+OnlyShowIn=XFCE;
+NoDisplay=true
+Terminal=false
+X-GNOME-Autostart-enabled=true
+EOF
+  chmod 0644 "${INSTALL_ROOT}/etc/xdg/autostart/devworks-trust-launchers.desktop"
   if [[ -n "${ADMIN_USER:-}" && -d "${INSTALL_ROOT}/home/${ADMIN_USER}" ]]; then
     mkdir -p "${INSTALL_ROOT}/home/${ADMIN_USER}/Desktop"
     cp "${INSTALL_ROOT}/usr/share/applications/devworks-control-center.desktop" \

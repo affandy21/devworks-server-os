@@ -1,46 +1,42 @@
-# Build Result
+# Build Result: v0.2.1-dualboot-hardware
 
-Build ISO Devworks Server OS terakhir berhasil dibuat.
+ISO standar Devworks Server OS v0.2.1 berhasil dibangun ulang dan artefak
+rilis ditandatangani pada 28 Mei 2026 WIB.
 
-## Output
+## Artefak Rilis
 
 ```text
 dist/devworks-server-os.iso
-dist/devworks-server-os-autoinstall.iso
-```
-
-## Checksum
-
-```text
 dist/devworks-server-os.iso.sha256
-dist/devworks-server-os-autoinstall.iso.sha256
+dist/devworks-server-os.iso.asc
+dist/devworks-server-os.iso.sha256.asc
+dist/devworks-server-os-package-manifest.tsv
+dist/devworks-server-os-package-manifest.tsv.sha256
+dist/devworks-server-os-package-manifest.tsv.asc
+dist/devworks-server-os-package-manifest.tsv.sha256.asc
+dist/devworks-server-os-release-signing-key.asc
 ```
-
-## Verifikasi Fitur
-
-Sudah masuk ke build:
-
-- ISO bootable berbasis Debian.
-- Desktop XFCE ringan.
-- Wallpaper Devworks default.
-- Icon Applications grid Devworks.
-- Devworks Control Center native GTK.
-- Shortcut Devworks Control Center di desktop.
-- Control Center tidak auto-start.
-- Installer permanen ke disk.
-- Manual confirm disk pada ISO standar.
-- Profil autoinstall khusus VirtualBox.
-
-## Bukti Uji Visual
-
-Screenshot hasil uji lokal:
 
 ```text
-devworks-final-desktop-fixed.png
-devworks-final-control-center-fixed.png
-devworks-menu-grid-icon-fixed.png
+SHA256 ISO: 76182a46025ef6d0f1c3b4680c981e251469699fa033997de530a6f713af583f
+GPG fingerprint: 426072F517789C47A914345A4F53E388EE9884EA
 ```
 
-## Catatan Stabilitas
+`devworks-server-os-autoinstall.iso` yang mungkin masih tersimpan adalah aset
+laboratorium lama untuk VM dengan disk disposable, bukan media rilis v0.2.1.
 
-Build sudah layak untuk uji VirtualBox dan server kosong. Untuk server production fisik, tetap lakukan validasi hardware, backup, pengujian restart berkali-kali, dan uji TLS/SSH/firewall setelah instalasi.
+## Verifikasi Lulus
+
+- Syntax shell, static dual boot safety guard, dan release policy guard.
+- Isi ISO: versi `0.2.1`, profil dual boot, guard EFI, GRUB Windows, splash boot, paket firmware, launcher native tepercaya dengan dukungan `gio`, dan layanan web/admin/fail2ban dimask pada sesi live.
+- Uji disk virtual loop GPT: partisi Linux diformat, ESP dan loader Microsoft tetap dipertahankan, backup GPT dibuat, dan partisi Microsoft data ditolak sebagai root.
+- SHA256 dan detached GPG signature untuk ISO serta package manifest.
+- QA VirtualBox UEFI dari ISO final: install permanen `INSTALL_EXIT=0`,
+  fallback `/boot/efi/EFI/BOOT/BOOTX64.EFI` tersedia, boot berhasil tanpa ISO,
+  `dw` tersedia di PATH user, dan Control Center native berjalan.
+
+## Cakupan GUI dan Hardware
+
+- Desktop XFCE ringan, wallpaper Devworks, icon Applications grid, dan Control Center native masuk ke ISO.
+- Firmware dasar AMD, Intel, dan NVIDIA GSP masuk ke ISO; driver proprietary NVIDIA/CUDA tetap opt-in.
+- ISO masih harus diuji pada perangkat fisik target sebelum dipakai sebagai server publik. Mode dual boot tidak melakukan resize Windows otomatis.

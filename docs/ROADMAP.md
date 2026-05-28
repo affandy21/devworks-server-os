@@ -25,13 +25,14 @@ Target:
 
 ## Fase 3: Dualboot Non-Destructive
 
-Target:
+Status: mode manual tersedia; pengujian perlu diperluas.
 
 - Deteksi OS dan partisi yang sudah ada.
 - Pilih partisi kosong.
-- Resize partisi dengan konfirmasi eksplisit.
+- Pertahankan EFI dan masukkan Windows Boot Manager ke GRUB.
+- Resize partisi otomatis tetap tidak dilakukan untuk menjaga keamanan data.
 - Backup partition table.
-- Konfigurasi GRUB agar OS lama tetap muncul.
+- Pengujian lanjutan matrix Windows/UEFI untuk mode `manual-partition` dan GRUB Windows Boot Manager.
 
 ## Fase 4: Service Manager
 
@@ -72,4 +73,3 @@ Target:
 - Restore checklist.
 - Recovery mode terdokumentasi.
 - Export diagnostic bundle untuk troubleshooting.
-

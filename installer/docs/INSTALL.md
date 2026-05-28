@@ -1,7 +1,8 @@
 # Devworks Server OS Installer
 
-The installer is a destructive permanent disk installer for Devworks Server OS.
-It is intended to run from a live Linux environment.
+The installer installs Devworks Server OS permanently from a live Linux
+environment. It has a destructive blank-disk mode and a guarded UEFI
+manual-partition mode for installing alongside an existing Windows system.
 
 ## Quick Start
 
@@ -11,8 +12,8 @@ nano installer/config.env
 sudo bash installer/devworks-install.sh --config installer/config.env
 ```
 
-The installer is destructive in the current `erase-disk` mode. For manual
-installs, keep the interactive confirmation enabled:
+The `erase-disk` mode is destructive. For blank-disk installs, keep the
+interactive confirmation enabled:
 
 ```bash
 DEVWORKS_MANUAL_CONFIRM_DISK="yes"
@@ -35,18 +36,53 @@ DEVWORKS_I_UNDERSTAND_THIS_ERASES_DISK="yes"
 Do not set the automated erase flag on a laptop or server that has more than
 one disk unless you have verified the target disk out of band.
 
-## Dualboot Status
+## Dual Boot UEFI
 
-Dualboot is not enabled in this installer yet. `INSTALL_MODE="erase-disk"`
-always replaces the selected disk. A proper dualboot workflow needs a separate
-non-destructive partition mode that can reuse an existing EFI System Partition
-and install Devworks into prepared free space without touching Windows/Linux
-partitions.
+Dual boot is supported only with the guarded `manual-partition` mode on UEFI
+systems. The installer does not resize Windows partitions. Prepare space in
+Windows first, using Disk Management, and create/select a dedicated Linux root
+partition from the live environment.
+
+Never use the VirtualBox autoinstall ISO for dual boot.
+
+Recommended procedure:
+
+1. Back up files and save the BitLocker recovery key if encryption is enabled.
+2. Disable Windows Fast Startup and hibernation.
+3. Shrink the Windows partition using Windows Disk Management.
+4. Boot the standard Devworks ISO in UEFI mode.
+5. Copy `installer/profiles/dualboot-manual.env` to a working config and fill:
+
+```bash
+INSTALL_MODE="manual-partition"
+TARGET_BOOT_MODE="efi"
+TARGET_ROOT_PARTITION="/dev/nvme0n1p6"
+TARGET_EFI_PARTITION="/dev/nvme0n1p1"
+TARGET_SWAP_PARTITION=""
+FORMAT_ROOT="yes"
+FORMAT_EFI="no"
+DEVWORKS_MANUAL_CONFIRM_DISK="yes"
+```
+
+6. Run the installer. It prints the chosen partitions and requires:
+
+```text
+INSTALL /dev/nvme0n1p6 KEEP-EFI /dev/nvme0n1p1
+```
+
+Only the selected Linux root partition is formatted. The existing FAT32 EFI
+partition is mounted without formatting. When the Microsoft EFI bootloader is
+present, GRUB includes a `Windows Boot Manager` menu entry. Before formatting
+root, the installer writes a GPT partition table backup and stores a copy in
+`/var/backups/devworks-installer/` on the new system.
 
 ## Main Parameters
 
-- `INSTALL_MODE`: currently only `erase-disk`.
+- `INSTALL_MODE`: `erase-disk` for an empty disk, or `manual-partition` for guarded UEFI dual boot.
 - `TARGET_DISK`: disk to erase and install onto, or `auto` for the disk picker.
+- `TARGET_ROOT_PARTITION`: dedicated Linux root partition to format in `manual-partition` mode.
+- `TARGET_EFI_PARTITION`: existing FAT32 EFI partition to preserve and reuse in `manual-partition` mode.
+- `FORMAT_EFI`: must remain `no` in `manual-partition` mode.
 - `DEVWORKS_MANUAL_CONFIRM_DISK`: show disk list and require typed confirmation.
 - `DEVWORKS_ALLOW_INSTALL_ON_MOUNTED_DISK`: default `no`; keep it disabled for safety.
 - `TARGET_BOOT_MODE`: `auto`, `efi`, or `bios`.
@@ -66,6 +102,8 @@ partitions.
 - `ENABLE_SERVICE_WIZARD`: installs the `dw`/`devworks` feature manager and service templates.
 - `ENABLE_GUI`: installs XFCE and LightDM.
 - `ENABLE_NATIVE_MONITOR`: installs native Devworks Control Center.
+- `ENABLE_HARDWARE_BACKPORTS`: opt-in newer Debian backports kernel/firmware for hardware that needs it.
+- `ENABLE_WINDOWS_BOOT_DETECTION`: adds Windows Boot Manager to GRUB when its EFI loader exists.
 
 ## Recommended Production Changes
 
