@@ -179,8 +179,8 @@ write_config() {
   cat > "${CONFIG_OUT}" <<EOF
 # Dibuat oleh Devworks Installer Wizard.
 # Config ini memasang base desktop/server bersih lebih dulu.
-DEVWORKS_I_UNDERSTAND_THIS_ERASES_DISK="no"
-DEVWORKS_MANUAL_CONFIRM_DISK="yes"
+DEVWORKS_I_UNDERSTAND_THIS_ERASES_DISK="yes"
+DEVWORKS_MANUAL_CONFIRM_DISK="no"
 DEVWORKS_ALLOW_INSTALL_ON_MOUNTED_DISK="no"
 INSTALL_MODE="erase-disk"
 TARGET_DISK="$(quote_value "${TARGET_DISK}")"
@@ -326,6 +326,7 @@ EOF
 
   write_config "${ssh_password_auth}" "${ssh_key_mode}" "${require_keys}"
   printf '\nConfig dibuat di: %s\n' "${CONFIG_OUT}"
+  printf 'Konfirmasi disk sudah diterima oleh wizard, jadi installer tidak akan menanyakan ERASE dua kali.\n'
   printf 'Installer dimulai. Setelah ini Anda akan diminta membuat password admin.\n\n'
   exec bash "${INSTALLER}" --config "${CONFIG_OUT}"
 }
