@@ -60,6 +60,42 @@ validate_linux_username() {
   [[ "$1" =~ ^[a-z_][a-z0-9_-]{0,31}$ ]]
 }
 
+validate_hostname() {
+  [[ "$1" =~ ^[a-zA-Z0-9][a-zA-Z0-9-]{0,62}$ ]] && [[ "$1" != *--* ]] && [[ "$1" != *- ]]
+}
+
+prompt_hostname() {
+  local value=""
+  while true; do
+    printf '\nMasukkan hostname server.\n'
+    printf 'Contoh yang benar: devworks-server, server01, web-ai-01\n'
+    printf 'Aturan: huruf/angka/tanda minus, tanpa spasi, tidak diakhiri tanda minus.\n'
+    value="$(prompt_default "Hostname server" "devworks-server")"
+    if validate_hostname "${value}"; then
+      HOSTNAME_VALUE="${value}"
+      return 0
+    fi
+    printf '\nHostname tidak valid: %s\n' "${value}" >&2
+    printf 'Silakan coba lagi. Contoh paling aman: devworks-server\n' >&2
+  done
+}
+
+prompt_admin_username() {
+  local value=""
+  while true; do
+    printf '\nMasukkan username admin Linux.\n'
+    printf 'Contoh yang benar: devworks, admin, irpan\n'
+    printf 'Aturan: huruf kecil, angka, underscore, atau minus. Tidak boleh spasi, titik, @, atau huruf besar.\n'
+    value="$(prompt_default "Username admin" "devworks")"
+    if validate_linux_username "${value}"; then
+      ADMIN_USER_VALUE="${value}"
+      return 0
+    fi
+    printf '\nUsername tidak valid: %s\n' "${value}" >&2
+    printf 'Silakan coba lagi. Contoh paling aman: devworks\n' >&2
+  done
+}
+
 quote_value() {
   printf '%q' "$1"
 }
@@ -247,11 +283,8 @@ EOF
   printf 'Periksa isi disk di bawah ini sebelum lanjut.\n\n'
   disk_partitions "${TARGET_DISK}"
 
-  printf '\nMasukkan hostname server. Contoh: devworks-server\n'
-  HOSTNAME_VALUE="$(prompt_default "Masukkan hostname server" "devworks-server")"
-  printf '\nMasukkan username admin Linux. Contoh: devworks\n'
-  ADMIN_USER_VALUE="$(prompt_default "Masukkan username admin" "devworks")"
-  validate_linux_username "${ADMIN_USER_VALUE}" || die "Username Linux tidak valid: ${ADMIN_USER_VALUE}"
+  prompt_hostname
+  prompt_admin_username
 
   local ssh_password_auth="yes"
   local ssh_key_mode="prompt"
